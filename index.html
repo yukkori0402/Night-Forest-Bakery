@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>夜の森のパン屋</title>
+<style>
+  :root{
+    --bg:#0b0f0d; --bg2:#131a15; --card:#182119; --card2:#1f2b20;
+    --warm:#f0b45a; --warm2:#ffd98f; --cream:#f6ead2; --muted:#b7ab93;
+    --line:#3a4a3c; --danger:#c0533f; --shadow:rgba(0,0,0,.55);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh; color:var(--cream);
+    font-family:"Hiragino Mincho ProN","Yu Mincho",YuMincho,"Noto Serif JP",serif;
+    background:
+      radial-gradient(900px 480px at 85% -10%, rgba(240,180,90,.16), transparent 60%),
+      radial-gradient(700px 500px at -10% 110%, rgba(64,110,74,.20), transparent 60%),
+      linear-gradient(180deg,var(--bg) 0%,var(--bg2) 100%);
+    line-height:1.9; letter-spacing:.02em;
+  }
+  .wrap{max-width:720px;margin:0 auto;padding:20px 16px 56px;}
+  header{text-align:center;padding:26px 8px 10px;}
+  .moon{font-size:30px;color:var(--warm2);}
+  h1{margin:6px 0 2px;font-size:clamp(26px,6vw,38px);font-weight:600;color:var(--warm2);letter-spacing:.12em;}
+  .subtitle{color:var(--muted);font-size:14px;margin:0 0 8px;}
+  .status{
+    display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center;
+    margin:14px auto 6px;max-width:640px;
+  }
+  .chip{
+    background:rgba(24,33,25,.9);border:1px solid var(--line);border-radius:999px;
+    padding:4px 12px;font-size:13px;color:var(--cream);white-space:nowrap;
+  }
+  .chip b{color:var(--warm2);font-weight:600;}
+  .dawnbar{max-width:640px;margin:10px auto 0;height:8px;border-radius:999px;background:#26312a;border:1px solid var(--line);overflow:hidden;}
+  .dawnbar > div{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,#5a6f8e,#c98a4b,#ffd98f);transition:width .8s ease;}
+  .dawnlabel{max-width:640px;margin:4px auto 0;display:flex;justify-content:space-between;font-size:11px;color:var(--muted);}
+  main.card{
+    margin-top:20px;background:linear-gradient(180deg,var(--card2),var(--card));
+    border:1px solid var(--line);border-radius:18px;box-shadow:0 18px 44px var(--shadow);
+    padding:26px 22px 24px;
+  }
+  .scene-img{font-size:34px;text-align:center;margin-bottom:6px;}
+  .scene-text{font-size:clamp(16px,4.4vw,18px);white-space:pre-wrap;min-height:220px;}
+  .scene-text .uneasy{color:#e8a496;}
+  .choices{margin-top:22px;display:grid;gap:12px;}
+  button.choice, button.restart{
+    appearance:none;width:100%;text-align:left;cursor:pointer;
+    background:#243327;color:var(--cream);border:1px solid #4b5f4e;border-radius:14px;
+    padding:16px 18px;font-size:16px;font-family:inherit;line-height:1.6;min-height:56px;
+    transition:transform .08s ease, background .2s ease, border-color .2s ease;
+  }
+  button.choice:hover, button.choice:active{background:#2f4534;border-color:var(--warm);}
+  button.choice:active{transform:scale(.99);}
+  button.choice .arrow{color:var(--warm);margin-right:8px;}
+  button.restart{text-align:center;background:var(--warm);color:#241806;border-color:var(--warm);font-weight:700;}
+  button.restart:hover{background:var(--warm2);}
+  .ending-badge{
+    display:inline-block;border:1px solid var(--warm);color:var(--warm2);
+    border-radius:999px;padding:4px 14px;font-size:13px;letter-spacing:.14em;margin-bottom:12px;
+  }
+  .ending-badge.horror{border-color:var(--danger);color:#f0a294;}
+  .ending-title{font-size:clamp(22px,5.6vw,30px);margin:0 0 14px;color:var(--warm2);}
+  .ending-badge.horror + .ending-title{color:#f0a294;}
+  .note{margin-top:18px;font-size:13px;color:var(--muted);text-align:center;}
+  .fade{animation:fade .55s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  @media (max-width:480px){ main.card{padding:22px 16px;} .scene-text{min-height:200px;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="moon" aria-hidden="true">☾ 🥐</div>
+    <h1>夜の森のパン屋</h1>
+    <p class="subtitle">――午前0時にだけ現れる店で、夜明けまでに帰り道を見つける物語</p>
+    <div class="status">
+      <span class="chip" id="chapterChip">第1章</span>
+      <span class="chip">時刻 <b id="timeChip">午前0:00</b></span>
+      <span class="chip" id="itemsChip">持ち物：なし</span>
+    </div>
+    <div class="dawnbar" aria-hidden="true"><div id="dawnFill"></div></div>
+    <div class="dawnlabel"><span>真夜中</span><span>夜明けが近づいている…</span><span>夜明け</span></div>
+  </header>
+
+  <main class="card fade" id="card">
+    <div class="scene-img" id="sceneImg" aria-hidden="true">🌲</div>
+    <div id="content"></div>
+    <div class="choices" id="choices"></div>
+    <p class="note">選択によって物語と結末が変わります。音は出ません。</p>
+  </main>
+</div>
+
+<script>
+"use strict";
+/* ============ 状態（フラグ） ============
+   helped        : 店主の手伝いを引き受けた
+   helpedDeep    : 厨房で最後まで手伝った
+   memoryTraded  : 対価に「記憶」を渡した
+   memoryDeep    : 記憶を渡し切った（抵抗しなかった）
+   hasGlowing    : 光るパンを持っている
+   hasWarm       : 温かいパンを持っている
+   sharedBread   : パンを森の動物と分けた
+   hasBlackBread : 黒いパンを持っている
+   ateBlackBread : 黒いパンを食べた（取り返しがつかない）
+   learnedTruth  : 店主と前の客の真実を知った
+   lookedBack    : 帰り道で振り返った
+   kindness      : 優しい選択の蓄積
+   darkness      : 不穏な選択・出来事の蓄積
+========================================== */
+let S;
+function newState(){
+  return {
+    helped:false, helpedDeep:false,
+    memoryTraded:false, memoryDeep:false,
+    hasGlowing:false, hasWarm:false, sharedBread:false,
+    hasBlackBread:false, ateBlackBread:false,
+    learnedTruth:false, lookedBack:false,
+    kindness:0, darkness:0
+  };
+}
+function applyFx(fx){
+  if(!fx) return;
+  for(const k in fx){
+    if(k==="kindness" || k==="darkness"){ S[k]+=fx[k]; }
+    else { S[k]=fx[k]; }
+  }
+}
+
+/* ============ シーン定義 ============
+   text は文字列、または state を受け取る関数（前の選択を本文に反映させるため）
+   choices: {label, next, fx, if(state)->bool}
+   ending: true のノードはエンディング表示になる
+====================================== */
+const SCENES = {
+  /* ---------- 第1章 夜の森 ---------- */
+  prologue:{
+    chapter:"第1章 ― 夜の森", time:"午前0:00", dawn:2, img:"🌲",
+    text:`気づいたとき、あなたは森の中にいた。
+
+山道を歩いていたはずなのに、いつの間にか、見覚えのない杉並木のあいだに立っている。スマートフォンは電池切れで、真っ黒な画面はあなたの顔だけをぼんやり映した。
+
+何度同じ方向へ歩いても、曲がりくねった細い道と、苔むした倒木と、同じ形の岩が現れる。
+
+――出口がないのではなく、この森が、あなたを外へ出す気がない。
+
+ふいに、鼻先をかすめたのは、焼きたてのパンの匂いだった。`,
+    choices:[
+      {label:"パンの匂いのする方へ歩く", next:"forest_voice"},
+      {label:"その場でしゃがみ、夜が明けるのを待つ", next:"forest_wait"}
+    ]
+  },
+  forest_wait:{
+    chapter:"第1章 ― 夜の森", time:"午前0:15", dawn:6, img:"🌲",
+    text:`待つことにした。けれど森の夜は、待つ者を放っておかない。
+
+目を閉じると、遠くで何かが歩く音がする。開けると止まる。閉じると、少しだけ近づく。
+三度目に目を閉じたとき、耳元で、自分の声がした。
+
+「――こっち」
+
+飛び起きたあなたの背後で、木々のあいだから、温かそうな小さな灯りが揺れていた。`,
+    choices:[
+      {label:"灯りに向かって走る", next:"bakery_arrival", fx:{darkness:1}},
+      {label:"ゆっくり、音を立てないように灯りへ近づく", next:"bakery_arrival"}
+    ]
+  },
+  forest_voice:{
+    chapter:"第1章 ― 夜の森", time:"午前0:20", dawn:8, img:"🦉",
+    text:`匂いを追って歩くと、頭上の枝でフクロウが一度だけ鳴いた。
+
+「戻りたいなら、明かりを数えるな」
+
+――今、フクロウが喋っただろうか。いや、そんなはずはない。そう自分に言い聞かせながら歩くうちに、木々の向こうに、小さな窓の灯りが見えてきた。
+
+灯りはひとつだけ。なのに、なぜか「数えるな」という言葉が、頭の隅で冷たく光っている。`,
+    choices:[
+      {label:"灯りのある小屋へ向かう", next:"bakery_arrival"},
+      {label:"立ち止まり、灯りが本当にひとつか確かめる", next:"bakery_two_lights"}
+    ]
+  },
+  bakery_two_lights:{
+    chapter:"第1章 ― 夜の森", time:"午前0:30", dawn:11, img:"🏮",
+    text:`目を凝らす。灯りは、ひとつ。
+
+――ではない。ふたつ、ある。ひとつは温かい橙色。もうひとつは、その少し奥で、青白く、瞬きもせずにこちらを見ている。
+
+青白い灯りの下には、店らしき影はない。ただ、まっすぐな「何か」が立っていて、あなたが灯りに気づいたことに、気づいている。
+
+橙色の灯りの方から、ドアベルの音がした。早く選べ、と言わんばかりに。`,
+    choices:[
+      {label:"橙色の灯りの店へ駆け込む", next:"bakery_arrival", fx:{darkness:1}},
+      {label:"青白い灯りを無視し、目を伏せて店へ歩く", next:"bakery_arrival", fx:{kindness:1}}
+    ]
+  },
+  bakery_arrival:{
+    chapter:"第1章 ― 夜の森", time:"午前0:40", dawn:15, img:"🥐",
+    text:`それは、パン屋だった。
+
+森の真ん中の空き地に、昼間なら素通りしてしまいそうな小さな店。窓からは湯気と灯りが漏れ、看板には、達筆とは言えない字でこう書かれている。
+
+『夜のパン屋　――午前0時から、夜明けまで』
+
+ドアを開けると、ベルが鳴った。店内はパンの匂いで満ちていて、カウンターの奥では、白い前掛けの店主が、こちらを見ていた。
+
+ずっと前から、あなたが来ることを知っていた、という顔で。`,
+    choices:[
+      {label:"「すみません、道に迷って……」と声をかける", next:"shopkeeper_meet"},
+      {label:"何も言わず、店の中をよく見る", next:"shop_look"}
+    ]
+  },
+  shop_look:{
+    chapter:"第1章 ― 夜の森", time:"午前0:50", dawn:18, img:"🍞",
+    text:`棚には焼きたてのパンが並んでいる。どれも美味しそうだ。ただ――
+
+一番奥の棚にだけ、値札の代わりに小さな木札が下がっていた。
+『お客さまの椅子』
+
+その棚の下には椅子が一脚だけ置かれていて、座面には、まだ人の温もりが残っているような窪みがあった。
+
+そのとき背後で店主が言った。
+
+「見ましたね」
+「大丈夫。座らなければ、まだお客さまです」`,
+    choices:[
+      {label:"振り返って店主と向き合う", next:"shopkeeper_meet", fx:{darkness:1, learnedTruth:false}},
+      {label:"椅子から目を逸らし、カウンターへ行く", next:"shopkeeper_meet"}
+    ]
+  },
+  /* ---------- 第2章 パン屋のルール ---------- */
+  shopkeeper_meet:{
+    chapter:"第2章 ― パン屋のルール", time:"午前1:00", dawn:24, img:"👤",
+    text:`店主は年配の男だった。笑うと目尻が下がる、穏やかな顔をしている。
+
+「迷い人ですね。この森はね、帰りたい人をすぐには帰さない。でも、うちのパンを買った人には、帰り道が見えるようになる」
+「夜明けまでに森を出てください。夜明けと一緒に、この店は消えます。……出られなかった人のことは、考えないほうがいい」
+
+店主は値札のないパンたちを、愛おしそうに撫でた。
+
+「うちではお金は受け取りません。代わりに、どちらかでお願いしています」`,
+    choices:[
+      {label:"「小さなお手伝い」をする ―― 厨房を手伝う", next:"kitchen", fx:{helped:true}},
+      {label:"「帰り道の記憶」を渡す ―― 今日ここへ来た道の記憶が、対価になる", next:"memory_trade", fx:{memoryTraded:true, darkness:1}}
+    ]
+  },
+  kitchen:{
+    chapter:"第2章 ― パン屋のルール", time:"午前1:30", dawn:32, img:"🔥",
+    text:`厨房は驚くほど普通だった。粉の匂い、オーブンの熱、並んだ生地。
+
+ただし、生地はあなたの手が離れたあとも、わずかに――呼吸するように、膨らんだり、しぼんだりしていた。
+
+「気にしないでください。夜の粉は、少しだけ生きています」
+「さあ、最後の窯です。焼き上がりを見届けたら、あなたのパンを選んでいい」
+
+店主はオーブンの前から離れない。あなたにできるのは、生地を運ぶか、火加減を見続けるか。`,
+    choices:[
+      {label:"最後まで残って、生地を運び続ける", next:"first_loaf", fx:{helpedDeep:true, kindness:1}},
+      {label:"火加減を見続ける（炎の中に、一瞬だけ人影のような揺らぎが見えた）", next:"first_loaf", fx:{darkness:1}}
+    ]
+  },
+  memory_trade:{
+    chapter:"第2章 ― パン屋のルール", time:"午前1:30", dawn:32, img:"🕯️",
+    text:`店主は小さな瓶を取り出し、あなたの額にそっと近づけた。
+
+瓶の中に、今日の夕方の景色が流れ込んでいく。駅前の坂道。コンビニの灯り。家までの道順。それらが、頭の奥から静かに抜けていく感覚。
+
+「安心してください。家に着けば、家のことは思い出します」
+「――『着けば』、ね」
+
+最後の一筋が抜ける直前、あなたは自分がどこに帰ろうとしていたのか、一瞬だけ、分からなくなった。`,
+    choices:[
+      {label:"途中で店主の手を止める（これ以上は渡さない）", next:"first_loaf", fx:{kindness:1}},
+      {label:"すべて渡し切る（帰れるなら、構わないと思った）", next:"first_loaf", fx:{memoryDeep:true, darkness:1}}
+    ]
+  },
+  first_loaf:{
+    chapter:"第2章 ― パン屋のルール", time:"午前2:00", dawn:40, img:"🍞",
+    text:(s)=>`窯の扉が開き、朝一番ならぬ「帰り道のパン」が焼き上がった。
+
+店主は棚から二種類のパンを取り、あなたの前に置いた。
+
+ひとつは、ほのかに光るパン。持つと、足元の闇が少しだけ退く。
+もうひとつは、ずっと温かいパン。両手で包むと、誰かと分け合いたくなる温かさだった。
+
+「選んでください。帰り道は、パンの数だけしか歩けません」
+${s.memoryTraded ? "\n（記憶を渡したあなたには、なぜか二つとも「懐かしい」気がした。）" : ""}`,
+    choices:[
+      {label:"光るパンを選ぶ（道を照らすパン）", next:"animal", fx:{hasGlowing:true}},
+      {label:"温かいパンを選ぶ（分け合えるパン）", next:"animal", fx:{hasWarm:true}}
+    ]
+  },
+  /* ---------- 第3章 夜明けまで ---------- */
+  animal:{
+    chapter:"第3章 ― 夜明けまで", time:"午前2:30", dawn:50, img:"🦊",
+    text:(s)=>{
+      let base = `店を出て森を歩き始めてすぐ、茂みから子ギツネが現れた。肋骨が浮くほど痩せて、あなたのパンをじっと見ている。\n\n`;
+      if(s.hasWarm){
+        base += `温かいパンの匂いが、夜の冷気に広がっていく。子ギツネは震えながらも、決して近づいてはこない。森の動物は、人から「奪う」ことはしないらしい。\n\n分けるかどうかは、あなた次第だった。`;
+      } else {
+        base += `光るパンに怯えるように、子ギツネは一歩下がった。けれど空腹には勝てないらしく、光の届かないところから、ずっとこちらを見ている。\n\nパンのかけらなら、光は弱まらないはずだ。分けるかどうかは、あなた次第だった。`;
+      }
+      return base;
+    },
+    choices:[
+      {label:"パンを半分、分けてあげる", next:"black_bread", fx:{sharedBread:true, kindness:1}},
+      {label:"分けずに先を急ぐ（夜明けまで、時間がない）", next:"black_bread", fx:{darkness:1}}
+    ]
+  },
+  black_bread:{
+    chapter:"第3章 ― 夜明けまで", time:"午前3:00", dawn:58, img:"🌑",
+    text:(s)=>`歩き続けると、道の真ん中に、パン屋の裏口らしき扉が立っていた。周りに建物はないのに、扉だけが、森の中に。
+
+半開きの扉の向こうは真っ暗で、その暗闇の床に、パンがひとつ、落ちていた。
+
+真っ黒なパン。焼き過ぎではない。光を吸い込むように黒く、近づくと、耳の奥で小さく――噛む音がした。誰も噛んでいないのに。
+
+${s.sharedBread ? "後ろで子ギツネが短く鳴いた。行くな、と言っているように聞こえた。" : "拾えば、帰り道が近くなる。そんな確信が、理由もなく湧いてきた。"}`,
+    choices:[
+      {label:"黒いパンを拾う", next:"faceless_customer", fx:{hasBlackBread:true, darkness:1}},
+      {label:"拾わず、扉を閉めて先へ進む", next:"faceless_customer", fx:{kindness:1}}
+    ]
+  },
+  faceless_customer:{
+    chapter:"第3章 ― 夜明けまで", time:"午前3:25", dawn:65, img:"🚪",
+    text:`扉の先の小道で、パン屋に戻る「客」とすれ違った。
+
+スーツ姿の人だった。手にはパン屋の紙袋。けれど、その人の顔は――のっぺりと、何もなかった。目も、鼻も、口もない。なのに、その人は確かに「こちらを見て」、紙袋を大事そうに抱え直した。
+
+すれ違いざま、口のないその人の喉のあたりから、声だけがした。
+
+「あまいにおい。もうすぐ、きみの番だね」`,
+    choices:[
+      {label:"「どういう意味ですか」と問い詰める", next:"shopkeeper_truth", fx:{learnedTruth:true}},
+      {label:"何も聞かず、足早にその場を離れる", next:"shopkeeper_truth", fx:{darkness:1}}
+    ]
+  },
+  shopkeeper_truth:{
+    chapter:"第3章 ― 夜明けまで", time:"午前3:45", dawn:72, img:"🕰️",
+    text:(s)=>{
+      let t = `気づくと、あなたは再びパン屋の前にいた。森の道は、店へ戻るようにできているらしい。\n\n店主はカウンターで、来ないはずの次の客のために、パンを並べ替えていた。\n\n`;
+      if(s.learnedTruth){
+        t += `「あの人はね、去年の迷い人です。夜明けまでに帰れなかった」\n店主は穏やかに言った。\n「帰れなかった人は、顔から少しずつ、こちらの住人になっていく。……私も最初は、迷い人でした」\n\n店主は笑った。目尻が下がる、いつもの笑顔で。けれどその笑顔には、もう「口」しかなかった。目が、いつの間にか、ない。\n\n「さあ。夜明けまで、あと少しです」`;
+      } else {
+        t += `「お帰りなさい。……いえ、まだ『お帰り』は早いですね」\n店主はいつも通り穏やかだった。ただ、さっきより少しだけ、声が若くなっている気がした。気のせいだと思いたかった。\n\n「さあ。夜明けまで、あと少しです」`;
+      }
+      return t;
+    },
+    choices:[
+      {label:"店主の勧める「近道」を聞く", next:"black_offer"},
+      {label:"近道は聞かず、自分の足で歩くと告げる", next:"black_offer", fx:{kindness:1}}
+    ]
+  },
+  black_offer:{
+    chapter:"第3章 ― 夜明けまで", time:"午前4:10", dawn:80, img:"🌑",
+    text:(s)=>{
+      let t = `店主は奥から、黒いパンをひとつ取り出して、あなたの前に置いた。\n\n「これを食べれば、一瞬で家の前に着きます。代金は要りません。その代わり――」\n\n店主は、あなたの顔をじっと見た。\n\n「ほんの少しだけ、あなたを、いただきます」\n\n`;
+      if(s.hasBlackBread){
+        t += `不思議なことに、あなたの手元にも同じ黒いパンがある。店のものと、手元のもの。二つの黒いパンは、呼吸を合わせるように、同時に小さく膨らんだ。`;
+      } else {
+        t += `黒いパンからは、焼きたての甘い匂いがした。空腹と疲労が、考えるより先に手を伸ばさせようとする。`;
+      }
+      return t;
+    },
+    choices:[
+      {label:"黒いパンを食べる（早く帰りたい）", next:"horror_path", fx:{ateBlackBread:true, darkness:2}},
+      {label:"食べない。パンを押し返す", next:"dawn_path"}
+    ]
+  },
+  horror_path:{
+    chapter:"第3章 ― 夜明けまで", time:"午前4:30", dawn:88, img:"🏠",
+    text:`黒いパンは、噛んだ瞬間に味がしなかった。味の代わりに、遠くでドアベルが鳴る音がした。
+
+目を開けると、あなたは自宅の玄関に立っていた。やっと帰れた。夜明けの光が窓から差し込み、すべてが終わったように思えた。
+
+――ただ、冷蔵庫のモーター音が止まっている。時計の秒針が止まっている。窓の外では、朝日が昇る途中で、ずっと止まっている。
+
+そして台所から、焼きたてのパンの匂いがした。誰もいないはずの台所から、あなたの声で、こう聞こえた。
+
+「いらっしゃいませ」`,
+    choices:[
+      {label:"台所へ行く", next:"ending_horror"}
+    ]
+  },
+  trapped_path:{
+    chapter:"第3章 ― 夜明けまで", time:"午前5:00", dawn:99, img:"🌑",
+    text:`門をくぐった瞬間、黒いパンが手の中で溶けるように消えた。
+
+「消えたなら、もう大丈夫だ」
+
+そう思いたくて、あなたは朝の道を急いだ。家の玄関の前で、やっと息をつく。
+
+――そのとき、ポケットの中で、何か温かいものが、小さく脈打った。
+
+消えたのではない。黒いパンは、姿を変えて、あなたについてきたのだ。`,
+    choices:[
+      {label:"家の中へ入る", next:"ending_horror"}
+    ]
+  },
+  dawn_path:{
+    chapter:"第3章 ― 夜明けまで", time:"午前4:30", dawn:88, img:"🌄",
+    text:(s)=>{
+      let t = `店主は少しだけ寂しそうに笑い、黒いパンを仕舞った。\n「それがいい。……私も、昔はそう言えたんです」\n\n店の外では、鳥の声がし始めていた。夜明けは近い。最後の道は二手に分かれている。\n\n`;
+      if(s.hasGlowing){
+        t += `光るパンが、左の小道を弱く照らしている。光に従えば、遠回りでも確実に進めそうだ。右手からは川の音がする。近道らしいが、真っ暗だ。`;
+      } else {
+        t += `左の小道は遠回りだが、空がわずかに白んでいる方向へ続いている。右手からは川の音がする。近道らしいが、足元が見えない。`;
+      }
+      return t;
+    },
+    choices:[
+      {label:"左の小道を行く（遠回りでも、明るい方へ）", next:"final_moment", fx:{kindness:1}},
+      {label:"右の近道を行く（川の音を頼りに）", next:"final_moment", fx:{darkness:1}}
+    ]
+  },
+  final_moment:{
+    chapter:"第3章 ― 夜明けまで", time:"午前4:50", dawn:95, img:"🌅",
+    text:`空が白み始めた。後ろでは、パン屋の灯りが弱くなっていく。
+
+あと少しで森を抜けられる。その確信と一緒に、強い誘惑が湧いた。
+
+振り返れば、あの店をもう一度見られる。店主の顔を、最後にもう一度だけ確認できる。なぜか「確認しなければいけない」気がして、首の後ろが冷たくなった。
+
+森の出口まで、あと十歩。`,
+    choices:[
+      {label:"振り返らずに歩き続ける", next:"final_gate"},
+      {label:"振り返って、店を見る", next:"final_gate", fx:{lookedBack:true, darkness:1}}
+    ]
+  },
+  final_gate:{
+    chapter:"第3章 ― 夜明けまで", time:"午前5:00", dawn:99, img:"🌳",
+    text:(s)=>{
+      let t = ``;
+      if(s.lookedBack){
+        t += `振り返った先に、パン屋はなかった。空き地があるだけだった。\n\nただ、空き地の真ん中に店主だけが立っていて、こちらに向かって、深く、深くお辞儀をしていた。顔を上げる気配が、いつまでも、なかった。\n\n前を向くと、木々が門のように開いた出口が見えた。\n\n`;
+      } else {
+        t += `振り返らなかったあなたに、背後からベルの音が一度だけ、別れのように鳴った。\n\n前には、木々が門のように開いた出口が見えた。\n\n`;
+      }
+      if(s.hasBlackBread && !s.ateBlackBread){
+        t += `そのとき、手元の黒いパンが重く脈打った。持ったまま門をくぐれば、何が起きるか分からない。――まだ、返しに行く時間は、ほんの少しだけある。`;
+      } else {
+        t += `門をくぐれば、朝の世界だ。`;
+      }
+      return t;
+    },
+    choices:[
+      {label:"門をくぐって、森を出る", next:"ENDING_GATE"},
+      {label:"黒いパンを店主に返しに行く", next:"ending_free",
+        if:(s)=>s.hasBlackBread && !s.ateBlackBread && s.learnedTruth},
+      {label:"黒いパンを持ったまま、門をくぐる", next:"trapped_path",
+        if:(s)=>s.hasBlackBread && !s.ateBlackBread}
+    ]
+  },
+
+  /* ---------- エンディング ---------- */
+  ending_horror:{
+    ending:true, horror:true, badge:"ホラーエンディング",
+    chapter:"エンディング", time:"――", dawn:100, img:"🥐",
+    title:(s)=> s.ateBlackBread ? "新しい店主" : "持ち帰ってしまったもの",
+    text:(s)=>{
+      if(!s.ateBlackBread){
+        return `家に帰り着き、その日は一日、何事もなく過ごした。
+
+――何事もなく、過ごしたはずだった。
+
+夜、午前0時。眠っていたあなたは、パンの焼ける匂いで目を覚ます。自宅の台所で、あなた自身の手が、意識とは無関係に生地をこねていた。冷蔵庫には入れた覚えのない「夜の粉」。棚には、並べた覚えのないパン。
+
+そして玄関のドアベルが、鳴った。あなたの家に、ドアベルはないのに。
+
+「――こっち」と、フクロウの声がした。
+
+森は、あなたを持ち帰らせることで、あなたの家へ引っ越してきたのだ。
+この物語の続きは、今夜から、あなたの家で始まる。`;
+      }
+      return `台所に、あなたが立っていた。
+
+白い前掛けをして、あなたの顔で、あなたの声で、次の「迷い人」を待っている。あなたが声をかけても、その人は穏やかに笑うだけだった。目尻が下がる、穏やかな笑顔で。
+
+その瞬間、理解した。黒いパンは「対価」だったのではない。あれは「引継ぎ」だったのだ。食べた者の居場所と、店主の居場所が、入れ替わる。
+
+――あなたの体は、その夜、無事に家へ帰った。帰ったのは、体だけだったが。
+
+次の夜。午前0時。森の真ん中で、新しいパン屋の灯りがともる。
+窓の向こうで、前の店主だったものが、自由なはずの闇の中へ、顔のないまま消えていく。
+
+そしてあなたは、カウンターの奥で微笑んでいる。
+棚の奥の椅子には、もう、あなたの温もりの窪みができていた。
+
+最初の客が、ドアベルを鳴らすまで、あと少し。`;
+    }
+  },
+  ending_free:{
+    ending:true, badge:"秘密のエンディング",
+    chapter:"エンディング", time:"午前5:05", dawn:100, img:"🌅",
+    title:"店主を解放する朝",
+    text:`走って店へ戻り、黒いパンをカウンターに置いた。
+
+「これ、返すよ。……あんたも、帰りなよ」
+
+店主は長いこと黙っていた。やがて、その顔に、目が、鼻が、口が、ひとつずつ戻ってきた。何十年も忘れていたはずの、自分の顔だった。
+
+夜明けの光が店に差し込み、パン屋は光の粒になって消えていく。最後に店主は、焼きたてパンをひとつ、あなたの胸に押し込んだ。
+
+家に帰り着き、パンを割ると、中から小さな紙が落ちた。
+
+『ありがとう。もう、店は開きません』
+
+その夜から、森にパン屋が現れることは、二度となかった。`
+  },
+  ending_warm:{
+    ending:true, badge:"温かいエンディング",
+    chapter:"エンディング", time:"午前5:10", dawn:100, img:"🦊",
+    title:"温かい朝",
+    text:`門の向こうは、見慣れた朝の道だった。
+
+振り返ると、森の入り口で子ギツネが見送っていた。あなたの分けたパンのおかげで、その足取りは来たときよりずっと確かだった。
+
+家に帰り着き、眠って、昼過ぎに目を覚ます。夢だったのだろう、と思いかけたとき、玄関に小さな紙袋が置かれていることに気づいた。
+
+中には温かいパンがひとつ。添えられたメモには、こうあった。
+
+『分けてくれて、ありがとうございました。また迷ったら、今度はお客さんとしてどうぞ』
+
+パンは、どこか懐かしい味がした。`
+  },
+  ending_safe:{
+    ending:true, badge:"通常エンディング",
+    chapter:"エンディング", time:"午前5:10", dawn:100, img:"🌄",
+    title:"静かな帰り道",
+    text:`門をくぐると、そこは早朝の住宅街だった。
+
+コンビニの灯り、新聞配達のバイクの音、遠くの踏切。当たり前の朝の音が、こんなにもありがたいものだったとは。
+
+家に帰り着いたあなたは、そのまま眠り込んだ。昼に目を覚ましたとき、昨夜のことは夢のように曖昧だった。
+
+ただひとつだけ、はっきり覚えている。森の中で聞いた、あの言葉だ。
+
+「戻りたいなら、明かりを数えるな」
+
+今夜もどこかで、午前0時にだけ開く店があるのかもしれない。それでもあなたは、もう二度と、あの森には近づかないだろう。
+
+――近づかないと、心に決めた。決めたはずなのに、夜になると、パンの匂いを探してしまう自分が、少しだけ、怖かった。`
+  },
+  ending_late:{
+    ending:true, horror:true, badge:"間に合わないエンディング",
+    chapter:"エンディング", time:"午前5:30", dawn:100, img:"🌫️",
+    title:"夜明けのない森",
+    text:`空は明るくなった。なのに、森は終わらなかった。
+
+何時間歩いても、同じ杉並木、同じ倒木、同じ形の岩。スマートフォンの時計は午前5時30分で止まり、太陽は昇る途中で動かない。
+
+やがて、遠くに小さな灯りが見えた。パン屋だ。今はもう、昼のはずなのに。
+
+店のドアが開き、店主が手招きをした。その顔には、目が増えていた。あなたの選択のひとつひとつを、ずっと数えていたような目だった。
+
+「おかえりなさい」
+「夜明けまでに出られなかった人はね、ここで夜が来るのを待つんです。……永遠に、ね」
+
+森の奥で、フクロウが鳴いた。今度ははっきりと聞き取れた。
+
+「だから言ったでしょう。明かりを、数えるなと」`
+  }
+};
+
+/* エンディング分岐の決定（門をくぐったとき） */
+function resolveGate(){
+  if(S.ateBlackBread) return "ending_horror";
+  if(S.darkness >= 4) return "ending_late";
+  if(S.sharedBread && (S.helped || S.helpedDeep)) return "ending_warm";
+  if(S.kindness >= 2 || S.hasGlowing) return "ending_safe";
+  if(S.memoryDeep) return "ending_late";
+  return "ending_safe";
+}
+
+/* ============ 描画 ============ */
+const contentEl = document.getElementById("content");
+const choicesEl = document.getElementById("choices");
+const cardEl = document.getElementById("card");
+const chapterChip = document.getElementById("chapterChip");
+const timeChip = document.getElementById("timeChip");
+const itemsChip = document.getElementById("itemsChip");
+const dawnFill = document.getElementById("dawnFill");
+const sceneImg = document.getElementById("sceneImg");
+
+function itemsText(){
+  const items = [];
+  if(S.hasGlowing) items.push("光るパン");
+  if(S.hasWarm) items.push("温かいパン");
+  if(S.hasBlackBread && !S.ateBlackBread) items.push("黒いパン");
+  if(S.memoryTraded) items.push("記憶の空き瓶");
+  return "持ち物：" + (items.length ? items.join("、") : "なし");
+}
+
+function render(id){
+  let scene = SCENES[id];
+  if(!scene){ id = "prologue"; scene = SCENES[id]; }
+  if(id === "ENDING_GATE"){ render(resolveGate()); return; }
+
+  chapterChip.textContent = scene.chapter;
+  timeChip.textContent = scene.time;
+  itemsChip.textContent = itemsText();
+  dawnFill.style.width = (scene.dawn || 0) + "%";
+  sceneImg.textContent = scene.img || "🌲";
+
+  cardEl.classList.remove("fade"); void cardEl.offsetWidth; cardEl.classList.add("fade");
+  contentEl.innerHTML = "";
+  choicesEl.innerHTML = "";
+
+  if(scene.ending){
+    const badge = document.createElement("span");
+    badge.className = "ending-badge" + (scene.horror ? " horror" : "");
+    badge.textContent = scene.badge || "エンディング";
+    const h = document.createElement("h2");
+    h.className = "ending-title";
+    h.textContent = (typeof scene.title === "function") ? scene.title(S) : scene.title;
+    const p = document.createElement("div");
+    p.className = "scene-text";
+    p.textContent = (typeof scene.text === "function") ? scene.text(S) : scene.text;
+    contentEl.appendChild(badge);
+    contentEl.appendChild(h);
+    contentEl.appendChild(p);
+
+    const btn = document.createElement("button");
+    btn.className = "restart";
+    btn.textContent = "最初から遊ぶ";
+    btn.onclick = ()=>{ S = newState(); render("prologue"); window.scrollTo({top:0, behavior:"smooth"}); };
+    choicesEl.appendChild(btn);
+    return;
+  }
+
+  const p = document.createElement("div");
+  p.className = "scene-text";
+  p.textContent = (typeof scene.text === "function") ? scene.text(S) : scene.text;
+  contentEl.appendChild(p);
+
+  (scene.choices || []).forEach(ch=>{
+    if(ch.if && !ch.if(S)) return;
+    const btn = document.createElement("button");
+    btn.className = "choice";
+    const arrow = document.createElement("span");
+    arrow.className = "arrow"; arrow.textContent = "▶";
+    btn.appendChild(arrow);
+    btn.appendChild(document.createTextNode(ch.label));
+    btn.onclick = ()=>{ applyFx(ch.fx); render(ch.next); window.scrollTo({top:0, behavior:"smooth"}); };
+    choicesEl.appendChild(btn);
+  });
+}
+
+S = newState();
+render("prologue");
+</script>
+</body>
+</html>
