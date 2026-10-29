@@ -162,7 +162,8 @@ function newMeta(){
   return {
     name: "", reason: "",
     loops: 0,               // 完了した周回数
-    endings: {},            // 到達済みエンディング {id:true}
+    endings: {},            // 到達したエンディング
+    endingCounts: {}, lastEndingId: "", pendingNudge: "", nudgesShown: {},
     notes: [],              // 手帳メモ [{id,text}]
     read: {},               // 既読シーン {id:true}
     readSig: {},            // 既読シーンの本文の指紋 {id:hash}
@@ -531,17 +532,17 @@ function renamePrompt(){
   openNotebook();
 }
 var ENDING_DEFS = [
-  {id:"tadaima", title:"ただいま", epi:"epi_td_1"},
-  {id:"kuzu", title:"パンくずの先", epi:"epi_kz_1"},
-  {id:"seki", title:"お客さんの席", epi:"epi_sk_1"},
-  {id:"ohayo", title:"おはよう", epi:"epi_as_1"},
-  {id:"irasshai", title:"いらっしゃい", epi:"epi_ir_1"},
-  {id:"nameless", title:"名前のない客", epi:"epi_nm_1"},
-  {id:"memo", title:"メモの書き手", epi:"epi_mm_1"},
-  {id:"nochoice", title:"選べない", epi:"epi_nc_1"},
-  {id:"owner", title:"新しい店主", epi:"epi_ow_1"},
-  {id:"shopmorning", title:"店主の朝", epi:"epi_tm_1"},
-  {id:"trueend", title:"朝の食卓", epi:"epi_tr_1"}
+  {id:"tadaima", title:"ただいま", epi:"epi_td_1", hint:"玄関の向こうで、誰かが待つようになる"},
+  {id:"kuzu", title:"パンくずの先", epi:"epi_kz_1", hint:"撒いたはずの道が、違う場所へ続いている"},
+  {id:"seki", title:"お客さんの席", epi:"epi_sk_1", hint:"食卓には、いつも一人分多い席がある"},
+  {id:"ohayo", title:"おはよう", epi:"epi_as_1", hint:"店でまどろむと、朝が来ることもある"},
+  {id:"irasshai", title:"いらっしゃい", epi:"epi_ir_1", hint:"家族は、帰りを待っている"},
+  {id:"nameless", title:"名前のない客", epi:"epi_nm_1", hint:"棚に、自分の名前のパンを置く客がいる"},
+  {id:"memo", title:"メモの書き手", epi:"epi_mm_1", hint:"奥の記録は、今夜のことも書いていく"},
+  {id:"nochoice", title:"選べない", epi:"epi_nc_1", hint:"信用を失うと、選ぶ前に体が動く"},
+  {id:"owner", title:"新しい店主", epi:"epi_ow_1", hint:"カウンターの内側は、思ったより静からしい"},
+  {id:"shopmorning", title:"店主の朝", epi:"epi_tm_1", hint:"朝の味を知るのは、店主だけではない"},
+  {id:"trueend", title:"朝の食卓", epi:"epi_tr_1", hint:"店の明かりが、朝まで届かない夜がある"}
 ];
 function openCollection(){
   var html = "<h2>これまでの結末</h2>";
@@ -549,7 +550,7 @@ function openCollection(){
   ENDING_DEFS.forEach(function(e){
     var got = !!M.endings[e.id];
     if(got) any = true;
-    html += '<div class="coll-item"><div><div class="t">' + (got ? "「" + esc(e.title) + "」" : "？？？") + '</div><div class="s">' + (got ? "読み返せる" : "まだ辿り着いていない") + '</div></div>';
+    html += '<div class="coll-item"><div><div class="t">' + (got ? "「" + esc(e.title) + "」" : "？？？") + '</div><div class="s">' + (got ? "読み返せる" : esc(e.hint || "まだ辿り着いていない")) + '</div></div>';
     if(got) html += '<button class="tool" onclick="rereadEpi(\'' + e.epi + '\')">後日談を読み返す</button>';
     html += '</div>';
   });
@@ -1582,6 +1583,11 @@ var t = "「" + (names[R.endedId] || "") + "」\n\n";
 if(R.reread){ t += "その夜のことは、ここまでだった。"; return t;}
 t += "夜は終わった。……終わった、はずだった。\n\n";
 t += "手帳には、今夜のことがいくつか書き残されている。\n次の夜、店はまた午前0時に現れる。";
+if(M.pendingNudge){
+  t += "\n\n――手帳の最後の頁に、自分の字で、こう書かれていた。\n\n『" + M.pendingNudge + "』";
+  M.pendingNudge = "";
+  saveAll();
+}
 return t;
 },
 choices:[
@@ -2420,12 +2426,39 @@ choices:[ {t:"席に戻る", to:"hub1"} ]
 };
 
 /* エンディング到達処理 */
+function pickNudge(){
+  var cand = [];
+  if(!M.truthSelf && (M.recordsDeep||0) < 1) cand.push(["nudge_room", "奥の方は、まだ何も知らない。"]);
+  if(!M.truthForest) cand.push(["nudge_forest", "森のことは、まだ聞いていない。"]);
+  if(!M.truthShop) cand.push(["nudge_shop", "この店のことは、まだ聞いていない。"]);
+  if(!M.expScatter) cand.push(["nudge_scatter", "パンくずは、まだ撒いたことがない。"]);
+  else if(!M.expNoScatter) cand.push(["nudge_noscatter", "撒かずに帰る夜は、まだない。"]);
+  if(!M.expPhoto && !M.expCaught) cand.push(["nudge_photo", "写真の中のことは、まだ確かめていない。"]);
+  if(M.slips < 4) cand.push(["nudge_slips", "店主の言い直しには、まだ続きがある気がする。"]);
+  for(var i=0;i<cand.length;i++){ if(!M.nudgesShown[cand[i][0]]) return cand[i]; }
+  return null;
+}
 function reachEnding(id){
 M.endings[id] = true;
 R.endedId = id;
 /* 静かな客は、この夜のどこかで声を払う（次周から筆談） */
 if(M.metQuiet && (M.talkedQuiet || R.quietPrice || R.quietWay || R.quietVoice)) M.quietVoiceless = true;
 M.bringUnlocked = true;
+if(!M.endingCounts) M.endingCounts = {};
+if(!M.nudgesShown) M.nudgesShown = {};
+var consecutiveEnd = (M.lastEndingId === id);
+M.endingCounts[id] = (M.endingCounts[id] || 0) + 1;
+M.lastEndingId = id;
+if(id !== "trueend" && !M.pendingNudge){
+  var pick = null;
+  if(finalReady() && !M.nudgesShown["nudge_final"]) pick = ["nudge_final", "手帳のメモが、みんな同じ方を向いてきた。次の夜は、今までと違う夜になる。"];
+  else if(consecutiveEnd || M.endingCounts[id] >= 3) pick = pickNudge();
+  if(pick){
+    M.nudgesShown[pick[0]] = true;
+    M.pendingNudge = pick[1];
+    addNote(pick[0], pick[1]);
+  }
+}
 saveAll();
 }
 function finishRun(){
