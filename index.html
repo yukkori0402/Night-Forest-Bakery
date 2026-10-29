@@ -187,7 +187,7 @@ function newRun(){
     trustShop: 2, trustTalk: 2, trustQuiet: 2, liedShop: false,
     metChild: false, metPair: false, metName: false, metNew: false, metFormer: false,
     phoneDone: false,
-    explored: 0, recordsRead: false, roomEntered: false, caught: false,
+    explored: 0, recordsRead: false, roomEntered: false, caught: false, recordsVisits: 0, kitchenVisits: 0, leftVisits: 0, umbrellaVisits: 0, diaryVisits: 0, roomVisits: 0, hideSpot: "",
     kuroBought: false, paidName: false, kuroAte: false,
     gaveMorning: false,
     final: false, finalBroken: false, finalSawBuyback: false,
@@ -1861,8 +1861,13 @@ choices:[
 explore_hub: {
 img:"🕯️",
 text:function(){
-var t = "店主は、奥に入ったままだった。\n\n冊子の頁の続きが、気になっていた。自分の行だけ、もう一度見たかった。";
-if(R.explored>=1) t += "\n\n窯の音の向こうで、店は静かだった。";
+var t;
+if(R.explored>=3){
+  t = "店主は、奥に入ったままだった。\n\n窯の音の向こうで、店は静かだった。";
+} else {
+  t = "店主は、奥に入ったままだった。\n\n冊子の頁の続きが、気になっていた。自分の行だけ、もう一度見たかった。";
+  if(R.explored>=1) t += "\n\n窯の音の向こうで、店は静かだった。";
+}
 return t;
 },
 choices:[
@@ -1875,10 +1880,12 @@ choices:[
 },
 explore_records: {
 img:"📒",
-onEnter:function(){ R.explored++; },
+onEnter:function(){ R.explored++; R.recordsVisits++; },
 text:function(){
 var t;
-if(!R.recordsRead){
+if(R.recordsVisits>=3){
+  t = "もう一度、頁を繰った。\n\nさっきと同じだった。名前と、パンと、お代。並びも、字も、変わっていない。";
+} else if(!R.recordsRead){
   R.recordsRead = true;
   t = "帳場の記録は、頁ごとに、夜の日付が並んでいた。\n\nどの頁にも、客の名前と、買ったパンと、お代。\n\n頁を繰ると、古い夜ほど、名前の字が読みにくかった。消えかけているのではなかった。最初から、ああいう字だった。";
 } else {
@@ -1892,18 +1899,26 @@ choices:[ {t:"調べるのを続ける", to:function(){ return (R.explored>=3 &&
 },
 explore_kitchen: {
 img:"🍳",
-onEnter:function(){ R.explored++; },
+onEnter:function(){ R.explored++; R.kitchenVisits++; },
 text:function(){
-var t = "厨房の入口から、窯が見えた。\n\n焼き上がったパンが、並んでいた。今夜の客の数より、ずっと多かった。\n\n誰の分なのかは、分からなかった。";
-if(loopN()>=4) t += "\n\n壁には、エプロンが二つ掛かっていた。一つは、店主のもの。一つは、少し小さかった。";
+var t;
+if(R.kitchenVisits>=2){
+  t = "窯の様子は、さっきと同じだった。\n\n焼き上がったパンが、今夜の客の数より、ずっと多く並んでいた。";
+} else {
+  t = "厨房の入口から、窯が見えた。\n\n焼き上がったパンが、並んでいた。今夜の客の数より、ずっと多かった。\n\n誰の分なのかは、分からなかった。";
+  if(loopN()>=4) t += "\n\n壁には、エプロンが二つ掛かっていた。一つは、店主のもの。一つは、少し小さかった。";
+}
 return t;
 },
 choices:[ {t:"調べるのを続ける", to:function(){ return (R.explored>=3 && !R.hidOnce) ? "explore_hide" : "explore_hub"; }} ]
 },
 explore_left: {
 img:"🧺",
-onEnter:function(){ R.explored++; },
-text: "客席の隅に、忘れ物の箱があった。\n\n傘が一本、手袋が片方、誰かの手帳。\n\n傘の持ち手には、小さな名札が付いていた。",
+onEnter:function(){ R.explored++; R.leftVisits++; },
+text:function(){
+if(R.leftVisits>=2) return "忘れ物の箱は、さっきと同じだった。\n\n傘が一本、手袋が片方、誰かの手帳。";
+return "客席の隅に、忘れ物の箱があった。\n\n傘が一本、手袋が片方、誰かの手帳。\n\n傘の持ち手には、小さな名札が付いていた。";
+},
 choices:[
 {t:"傘の名札を見る", to:"explore_umbrella"},
 {t:"誰かの手帳を読む", to:"explore_diary"},
@@ -1912,8 +1927,14 @@ choices:[
 },
 explore_umbrella: {
 img:"☂️",
+onEnter:function(){ R.umbrellaVisits++; },
 text:function(){
-var t = "名札には、" + prevGuestName() + "と書かれていた。\n\n隅の席の客が名乗った名前とは、違っていた。\n\n先週の雨の日に、置いていったのだろうか。……この店に、先週が、あるのだろうか。";
+var t;
+if(R.umbrellaVisits>=2){
+  t = "名札には、" + prevGuestName() + "と書かれていた。\n\n隅の席の客が名乗った名前とは、違っていた。さっきと、同じだった。";
+} else {
+  t = "名札には、" + prevGuestName() + "と書かれていた。\n\n隅の席の客が名乗った名前とは、違っていた。\n\n先週の雨の日に、置いていったのだろうか。……この店に、先週が、あるのだろうか。";
+}
 addNote("umbrella_name","忘れ物の傘の名札と、隅の席の客の名乗った名前が、違っていた。");
 saveAll();
 return t;
@@ -1922,9 +1943,14 @@ choices:[ {t:"調べるのを続ける", to:function(){ return (R.explored>=3 &&
 },
 explore_diary: {
 img:"📓",
-onEnter:function(){ M.truthForest = true; saveAll(); },
+onEnter:function(){ M.truthForest = true; R.diaryVisits++; saveAll(); },
 text:function(){
-var t = "手帳の持ち主の字は、震えていた。\n\n『三日目。まだ朝が来ない。店主は嘘をつかない。だから怖い』\n\n『森は、人を呼ぶ。呼ばれた者は、店を持つか、客でいるかしかない』\n\n最後の頁は、字の途中で切れていた。";
+var t;
+if(R.diaryVisits>=2){
+  t = "手帳は、さっきと同じ頁で、開かれていた。\n\n『三日目。まだ朝が来ない。店主は嘘をつかない。だから怖い』\n\nその先は、字の途中で切れたままだった。";
+} else {
+  t = "手帳の持ち主の字は、震えていた。\n\n『三日目。まだ朝が来ない。店主は嘘をつかない。だから怖い』\n\n『森は、人を呼ぶ。呼ばれた者は、店を持つか、客でいるかしかない』\n\n最後の頁は、字の途中で切れていた。";
+}
 addNote("diary_forest","誰かの手帳に『森は人を呼ぶ。呼ばれた者は店を持つか、客でいるかしかない』とあった。");
 saveAll();
 return t;
@@ -1947,9 +1973,16 @@ choices:[
 },
 room_records: {
 img:"📚",
-onEnter:function(){ if(!R.roomEntered){ R.roomEntered = true; M.recordsDeep++; } M.truthSelf = true; saveAll(); },
+onEnter:function(){ R.roomVisits++; if(!R.roomEntered){ R.roomEntered = true; M.recordsDeep++; } M.truthSelf = true; saveAll(); },
 text:function(){
-var t = "奥の部屋は、帳場の続きだった。\n\n棚には、記録の束と、名前の書かれたパンが並んでいた。一つひとつに、違う名前があった。\n\n一番新しい記録を開いた。今夜のことが、途中まで書かれていた。\n\n私が店に着いたこと。席に座ったこと。――字は、途中から、私の字だった。";
+var t;
+if(R.roomVisits>=3){
+  t = "一番新しい記録は、また少し進んでいた。\n\nそれ以上は、見なかった。";
+} else if(R.roomVisits===2){
+  t = "奥の部屋は、帳場の続きだった。\n\n一番新しい記録は、さっきより少し進んでいた。私が今夜、店でしたこと。席でしたこと。\n\n――全部、書かれていた。字は、やっぱり私の字だった。";
+} else {
+  t = "奥の部屋は、帳場の続きだった。\n\n棚には、記録の束と、名前の書かれたパンが並んでいた。一つひとつに、違う名前があった。\n\n一番新しい記録を開いた。今夜のことが、途中まで書かれていた。\n\n私が店に着いたこと。席に座ったこと。――字は、途中から、私の字だった。";
+}
 addNote("records_self","奥の部屋の記録に、今夜のことが途中まで書かれていた。字は、私の字だった。");
 saveAll();
 return t;
@@ -1960,16 +1993,23 @@ explore_hide: {
 img:"🌑",
 text: "奥から、足音がした。店主が戻ってくる。\n\n私は、カウンターの向こう側にいた。言い訳のできる場所では、なかった。",
 choices:[
-{t:"カウンターの下に隠れる", to:function(){ return isRain() ? "explore_clean" : "explore_caught"; }},
-{t:"棚の影に隠れる", to:function(){ return (M.loops % 2 === 0) ? "explore_clean" : "explore_caught"; }},
-{t:"奥の部屋の戸の陰に隠れる", to:"explore_clean", if:function(){ return !!R.roomEntered; }}
+{t:"カウンターの下に隠れる", to:function(){ return isRain() ? "explore_clean" : "explore_caught"; }, do:function(){ R.hideSpot = "counter"; }},
+{t:"棚の影に隠れる", to:function(){ return (M.loops % 2 === 0) ? "explore_clean" : "explore_caught"; }, do:function(){ R.hideSpot = "shelf"; }},
+{t:"奥の部屋の戸の陰に隠れる", to:"explore_clean", if:function(){ return !!R.roomEntered; }, do:function(){ R.hideSpot = "door"; }}
 ]
 },
 explore_caught: {
 img:"🕯️",
 onEnter:function(){ R.hidOnce = true; R.caught = true; M.expCaught = true; saveAll(); },
 text:function(){
-var t = "足音が、止んだ。\n\n「……お客様？」\n\n店主の声は、優しいままだった。責める言い方は、しなかった。\n\n「閉店の支度を、していましたので」\n\n私は、席に戻った。店主は、私のいた方を、一度だけ見た。";
+var t;
+if(R.hideSpot==="counter"){
+  t = "カウンターの下に潜り込んだ。思ったより狭くて、膝を抱えきれなかった。\n\n足音が近づいて、カウンターの前で、止んだ。\n\n身を縮めるたび、膝が棚板に当たって、小さく音を立てた。\n\n「……お客様？」\n\n店主の声は、優しいままだった。責める言い方は、しなかった。\n\n私は、席に戻った。店主は、私のいた方を、一度だけ見た。";
+} else if(R.hideSpot==="shelf"){
+  t = "棚の影に、体を寄せた。息を殺して、目を伏せた。\n\n足音は、一度通り過ぎて――戻ってきた。\n\n棚のパンの端が、私の袖で、少しだけ崩れていた。\n\n「……お客様？」\n\n店主の声は、優しいままだった。責める言い方は、しなかった。\n\n私は、席に戻った。店主は、私のいた方を、一度だけ見た。";
+} else {
+  t = "足音が、止んだ。\n\n「……お客様？」\n\n店主の声は、優しいままだった。責める言い方は、しなかった。\n\n「閉店の支度を、していましたので」\n\n私は、席に戻った。店主は、私のいた方を、一度だけ見た。";
+}
 addNote("slip_look","店主に、奥にいるところを見られた。店主は、責めなかった。");
 saveAll();
 return t;
@@ -1979,7 +2019,19 @@ choices:[ {t:"席で、夜が更けるのを待つ", to:"peek_return"} ]
 explore_clean: {
 img:"🌑",
 onEnter:function(){ R.hidOnce = true; },
-text: "足音は、私のそばを通り過ぎて、窯の方へ行った。\n\n息を止めていたことに、音が遠ざかってから気づいた。\n\n店主が奥へ入るのを見てから、席に戻った。",
+text:function(){
+var t;
+if(R.hideSpot==="counter"){
+  t = "カウンターの下で、息を殺した。雨音が、店の音を遠くしていた。\n\n足音は、カウンターの前を通り過ぎて、窯の方へ行った。\n\n音が遠ざかってから、席に戻った。";
+} else if(R.hideSpot==="shelf"){
+  t = "棚の影で、息を殺した。\n\n足音は、私のそばを通り過ぎて、窯の方へ行った。\n\n息を止めていたことに、音が遠ざかってから気づいた。\n\n店主が奥へ入るのを見てから、席に戻った。";
+} else if(R.hideSpot==="door"){
+  t = "奥の部屋の戸の陰で、息を殺した。\n\n足音は、戸の前を通り過ぎて、窯の方へ行った。\n\n音が遠ざかってから、席に戻った。";
+} else {
+  t = "足音は、私のそばを通り過ぎて、窯の方へ行った。\n\n息を止めていたことに、音が遠ざかってから気づいた。\n\n店主が奥へ入るのを見てから、席に戻った。";
+}
+return t;
+},
 choices:[ {t:"席で、夜が更けるのを待つ", to:"peek_return"} ]
 }
 ,
