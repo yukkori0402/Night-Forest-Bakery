@@ -406,8 +406,7 @@ function render(){
       }
     }
     if(list.length === 1){
-      var bigDest = destId && (destId.indexOf("end_") === 0 || destId === "true_dawn" || destId === "memo_stay" || destId === "buyback_yes" || destId === "owner_farewell" || destId === "morning_farewell" || destId === "gate_home" || destId === "gate_auto" || destId === "gate_name" || destId === "gate_ir" || destId === "crumb_arrive" || destId === "final_walk");
-      var contLabel = bigDest ? c.t : "つづける";
+      var contLabel = c.t;
       b.className = "continue" + (seenSame ? " seen" : "");
       b.innerHTML = esc(contLabel) + (seenSame ? '<span class="seen-tag">前に読んだ</span>' : '');
       b.setAttribute("aria-label", contLabel);
@@ -493,6 +492,7 @@ function showTitle(){
   }
   html += '</div>';
   html += '<div style="font-size:13px;color:var(--muted);margin:2px 0 10px">※ 静かなホラー要素のある物語です</div>';
+  html += '<div style="font-size:12px;color:var(--muted);margin:0 0 10px">進み具合はこの端末のブラウザに保存されます。履歴を消すと消えることがあります</div>';
   if(!hasName){
     html += '<label style="font-size:14px;color:var(--ink2)">あなたの名前</label>';
     html += '<input class="namein" id="nameInput" type="text" maxlength="12" placeholder="名前を入力してください" autocomplete="off">';
