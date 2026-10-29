@@ -895,7 +895,7 @@ choices:[
     {t:"自分のお代に、何が入っているのか聞く", to:"ask_shop_ownprice", if:function(){ return R.ownPriceWorry && !R.ownPriceAsked; }},
     {t:"他のお客さんのことを聞く", to:"ask_shop_guests", if:function(){ return !R.shopGuests; }},
     {t:"夜明けまでいてもいいか聞く", to:"ask_shop_stay", if:function(){ return !R.shopStay; }},
-    {t:"この店の、持ち主のことを聞く", to:"buyback_talk", if:function(){ return M.truthSelf && M.slips>=3; }, do:function(){ R.buybackFrom = "shop"; }},
+    {t:"この店の、持ち主のことを聞く", to:"buyback_talk", if:function(){ return M.truthSelf && M.truthShop && M.slips>=3; }, do:function(){ R.buybackFrom = "shop"; }},
     {t:"席に戻る", to:"hub1"}
   ]
 },
@@ -1364,7 +1364,7 @@ t += "自分の行を探した。名前も聞かれていないのに、書か�
 t += "……指が、先に止まったのは、別の頁だった。\n";
 t += "名前の欄の字が、一つだけ――私の字に、とてもよく似ていた。\n";
 t += "似ているだけだと思いたかった。けれど、字の癖までが、私のものだった。";
-addNote("counter_ledger","帳場の記録に、私の字によく似た字で書かれた名前があった。"); M.truthSelf = true;
+addNote("counter_ledger","帳場の記録に、私の字によく似た字で書かれた名前があった。");
 return t;
 },
 choices:[ {t:"もう少し、店の中を見る", to:"explore_hub"}]
@@ -1420,7 +1420,7 @@ choices:[
 {t:"欠片を落としながら、店を出る", to:"depart_crumb", if:function(){ return hasScatterable() && !isRain(); }},
 {t:"店主に、持ってきたものを渡す", to:"give_food_late", if:function(){ return (R.bring==="onigiri" || R.bring==="tea") && !R.bringEaten && !R.bringShared; }},
 {t:"奥の部屋へ行く", to:"memo_stay", if:function(){ return R.roomEntered && (M.truthSelf || (M.recordsDeep||0)>=2); }},
-{t:"「この店を、私に売ってください」と言う", to:"buyback_talk", if:function(){ return M.truthSelf && M.slips>=3; }, do:function(){ R.buybackFrom = "late"; }}
+{t:"「この店を、私に売ってください」と言う", to:"buyback_talk", if:function(){ return M.truthSelf && M.truthShop && M.slips>=3; }, do:function(){ R.buybackFrom = "late"; }}
 ]
 },
 depart_plain: {
