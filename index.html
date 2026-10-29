@@ -163,6 +163,7 @@ function newMeta(){
     endings: {},            // 到達済みエンディング {id:true}
     notes: [],              // 手帳メモ [{id,text}]
     read: {},               // 既読シーン {id:true}
+    readSig: {},            // 既読シーンの本文の指紋 {id:hash}
     slips: 0,               // 記録した店主の綻びの数
     quietVoiceless: false,  // 静かな客が声を失った（次周から筆談）
     photos: [],             // 撮った写真の id（周回をまたぐ）
@@ -297,6 +298,18 @@ function refreshStatus(){
   document.body.classList.toggle("late", R.phase>=3);
 }
 function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function textSig(t){
+  var h = 5381, str = String(t);
+  for(var i=0;i<str.length;i++){ h = (((h*33) ^ str.charCodeAt(i)) >>> 0); }
+  return h;
+}
+function previewText(sc){
+  if(typeof sc.text === "string") return sc.text;
+  var snapM = JSON.stringify(M), snapR = JSON.stringify(R), t = null;
+  try { t = sc.text(); } catch(e){ t = null; }
+  try { M = JSON.parse(snapM); R = JSON.parse(snapR); saveAll(); } catch(e2){}
+  return t;
+}
 function richText(t){
   var str = String(t), out = "", d = 0;
   for(var i=0;i<str.length;i++){
@@ -343,7 +356,15 @@ function render(){
       var seenSame = false;
       if(typeof c.to === "string" && M.read[c.to]){
         var dsc = SCENES[c.to];
-        if(dsc && typeof dsc.text === "string") seenSame = true;
+        if(dsc){
+          var sig = (M.readSig || {})[c.to];
+          if(typeof sig === "number"){
+            var pv = previewText(dsc);
+            if(pv !== null && textSig(pv) === sig) seenSame = true;
+          } else if(typeof dsc.text === "string"){
+            seenSame = true;
+          }
+        }
       }
       if(seenSame) b.className = "choice seen";
       b.innerHTML = '<span class="arrow">▸</span>' + esc(c.t) + (seenSame ? '<span class="seen-tag">前に読んだ</span>' : '');
@@ -356,7 +377,10 @@ function render(){
     });
     choicesEl.appendChild(b);
   });
-  M.read[R.scene] = true; saveAll();
+  M.read[R.scene] = true;
+  if(!M.readSig) M.readSig = {};
+  M.readSig[R.scene] = textSig(text);
+  saveAll();
   /* 見えない制限時間（最終局面専用）：時間切れで自動的に進む */
   if(sc.timeout && !R.reread){
     var tkT = navToken; var destT = sc.timeout.to; var msecT = sc.timeout.sec * 1000; var curT = R.scene;
