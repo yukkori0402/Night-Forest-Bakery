@@ -897,7 +897,7 @@ choices:[
     {t:"店主に、パンの半分を渡す", to:"share_shop", if:function(){ return hasBread("wake") && !R.sharedWake; }},
     {t:"店の外を見に行く", to:"out_gate", if:function(){ return R.quietWay; }},
     {t:"それでも、外を見に行く", to:"out_gate", if:function(){ return !R.quietWay && R.talkWay && R.shopStay; }},
-    {t:"席で、夜明けを待つ", to:"wait_stay", if:function(){ return !R.final && (R.talkWay || R.shopStay || R.quietWay); }},
+    {t:"席で、夜明けを待つ", to:"wait_stay", if:function(){ return (R.talkWay || R.shopStay || R.quietWay); }},
     {t:"棚のパンを、見に行く", to:"shelf", if:function(){ return !R.boughtBread && (R.metTalkRun || R.quietWay || R.quietPrice || R.quietVoice || R.shopPrice2 || R.shopGuests || R.shopStay); }},
     {t:"子どもの客に、声をかける", to:"ask_child", if:function(){ return loopN()>=2 && !R.metChild && !guestGone("child"); }},
     {t:"二人連れの客に、声をかける", to:"ask_pair", if:function(){ return loopN()>=2 && !R.metPair && !guestGone("pair"); }},
@@ -1403,7 +1403,8 @@ img:"🪑",
 text: "席に戻った。\n\n店主が、カウンターで冊子を開いた。戻ってきた客の記録を、つけるつもりらしかった。\n\n書きかけたところで、奥の窯が、小さく鳴った。\n\n「窯を見てきますね」\n\n店主は、冊子を開いたまま、奥へ入っていった。\n\n――一切れの後、私の分として何か書いた、あの冊子だった。\n何を書いたのか、聞いても、教えてもらえなかった。\n\n開いたままの頁が、店の明かりの中で白く見えた。",
 choices:[
 {t:"カウンターへ行って、自分の行だけ見る", to:"peek_go"},
-{t:"何もせず、席で待つ", to:"wait_quiet"}
+{t:"何もせず、席で待つ", to:"wait_quiet"},
+{t:"席で、夜明けを待つ", to:"wait_stay2", if:function(){ return (R.talkWay || R.shopStay || R.quietWay); }}
 ]
 },
 peek_go: {
