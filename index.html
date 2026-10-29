@@ -170,7 +170,7 @@ function newMeta(){
     name: "", reason: "",
     loops: 0,               // 完了した周回数
     endings: {},            // 到達したエンディング
-    endingCounts: {}, lastEndingId: "", pendingNudge: "", nudgesShown: {},
+    endingCounts: {}, lastEndingId: "", pendingNudge: "", nudgesShown: {}, shioriOpen: {},
     notes: [],              // 手帳メモ [{id,text}]
     read: {},               // 既読シーン {id:true}
     readSig: {},            // 既読シーンの本文の指紋 {id:hash}
@@ -577,6 +577,24 @@ function openNotebook(){
   html += noteSection("―― 気づき", nudgeNotes);
   html += noteSection("―― 店主の言い直し", slipNotes);
   html += noteSection("―― メモ", restNotes);
+  html += '<div style="margin:14px 0 4px;font-weight:bold">―― まだ見ていない夜</div>';
+  var unreached = ENDING_DEFS.filter(function(e){ return !M.endings[e.id]; });
+  if(!unreached.length) html += '<div class="entry">見ていない夜は、もう残っていない。</div>';
+  var anyTwice = false;
+  for(var ek in (M.endingCounts || {})){ if(M.endingCounts[ek] >= 2) anyTwice = true; }
+  unreached.forEach(function(e, i){
+    var num = ("0" + (i + 1)).slice(-2);
+    var opened = (M.shioriOpen || {})[e.id] || 1;
+    html += '<div class="entry"><div>夜のしおり ' + num + '</div>';
+    html += '<div>' + esc(e.hint) + '</div>';
+    var minNight = HINT_MIN_NIGHT[e.id];
+    if(minNight && loopN() < minNight) html += '<div style="font-size:13px;color:var(--muted)">この道は' + (minNight === 3 ? "三" : "二") + '夜目から</div>';
+    if(opened >= 2) html += '<div>' + esc(HINT_STAGE2[e.id]) + '</div>';
+    else if(M.loops >= 1) html += '<div><button class="tool" onclick="openShiori(\'' + e.id + '\',2)">もう少し読む</button></div>';
+    if(opened >= 3) html += '<div>' + esc(HINT_STAGE3[e.id]) + '</div>';
+    else if(anyTwice) html += '<div><button class="tool" onclick="openShiori(\'' + e.id + '\',3)">道をたしかめる</button></div>';
+    html += '</div>';
+  });
   html += '<div style="margin-top:14px"><button class="tool" onclick="closeOverlay()">閉じる</button> ';
   html += '<button class="tool" onclick="renamePrompt()">名前を変更する</button></div>';
   sheetEl.innerHTML = html;
@@ -622,6 +640,39 @@ function openCollection(){
   html += '<div style="margin-top:14px"><button class="tool" onclick="closeOverlay()">閉じる</button></div>';
   sheetEl.innerHTML = html;
   overlayEl.classList.add("open");
+}
+var HINT_STAGE2 = {
+  tadaima: "森の呼び声に、振り返ってみる",
+  kuzu: "雨のない夜、パンを残して店を出る",
+  seki: "黒パンを買わず、森の声に耳を澄ます",
+  ohayo: "帰り道を聞いたあと、店で待つ",
+  irasshai: "森の声に聞き返し、忘れ物を受け取る",
+  nameless: "三夜目から、棚の黒いパンを尋ねる",
+  memo: "帳場を二度調べ、閉店後は奥へ",
+  nochoice: "おにぎりを食べず、店で匂いを隠す",
+  owner: "隅の客と話し、言い直しを集める",
+  shopmorning: "次の夜、持参したお茶を閉店時に渡す",
+  trueend: "真相と二つの帰り方を、手帳に集める"
+};
+var HINT_STAGE3 = {
+  tadaima: "「振り返る」。忘れ物は受け取らない",
+  kuzu: "「欠片を落としながら、店を出る」",
+  seki: "「足を止めて、声のする方を確かめる」",
+  ohayo: "「席で、夜明けを待つ」を選ぶ",
+  irasshai: "「何を、忘れましたか」と聞き返す",
+  nameless: "「名前を置いて、受け取る」",
+  memo: "「帳場の記録を、もう一度見る」を二度",
+  nochoice: "「何も、入っていません」と言う",
+  owner: "「この店の、持ち主のことを聞く」",
+  shopmorning: "閉店時「店主に、持ってきたものを渡す」",
+  trueend: "「丁寧に断る」。最後は七秒、何も選ばない"
+};
+var HINT_MIN_NIGHT = { nameless: 3, nochoice: 2, owner: 2, shopmorning: 2 };
+function openShiori(id, stage){
+  if(!M.shioriOpen) M.shioriOpen = {};
+  M.shioriOpen[id] = Math.max(M.shioriOpen[id] || 1, stage);
+  saveAll();
+  openNotebook();
 }
 function rereadEpi(epiId){
   closeOverlay();
