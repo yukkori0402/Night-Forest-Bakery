@@ -148,6 +148,7 @@ function newMeta(){
     slips: 0,               // 記録した店主の綻びの数
     quietVoiceless: false,  // 静かな客が声を失った（次周から筆談）
     photos: [],             // 撮った写真の id（周回をまたぐ）
+    reviewedPhotos: [],     // 見返し済みの写真 id
     truthForest: false, truthShop: false, truthSelf: false,
     expScatter: false, expNoScatter: false,
     expCaught: false,
@@ -157,7 +158,7 @@ function newMeta(){
     bringUnlocked: false,
     finalArmed: false,
     skip: false,
-    metTalk: false, metQuiet: false
+    metTalk: false, metQuiet: false, talkedQuiet: false
   };
 }
 function newRun(){
@@ -201,6 +202,12 @@ var R = loadJSON(RUN_KEY, null);  if(!R || typeof R !== "object") R = newRun();
 (function(){
   var dm = newMeta(); for(var k in dm){ if(M[k]===undefined) M[k]=dm[k]; }
   var dr = newRun();  for(var k2 in dr){ if(R[k2]===undefined) R[k2]=dr[k2]; }
+  /* 声の喪失は、実際に話題を聞いた会話があった場合だけ。会話の記録（手帳メモ）が無いのに筆談化していた旧セーブは戻す */
+  if(M.quietVoiceless && !M.talkedQuiet){
+    var hasQuietNote = false;
+    for(var n3=0;n3<M.notes.length;n3++){ if(M.notes[n3].id==="quiet_price" || M.notes[n3].id==="quiet_way") hasQuietNote = true; }
+    if(hasQuietNote){ M.talkedQuiet = true; } else { M.quietVoiceless = false; }
+  }
 })();
 
 var PHASES = ["午前0時すぎ","午前1時","午前2時","午前3時","午前4時","夜明け前"];
@@ -905,7 +912,7 @@ ask_quiet: {
 ask_quiet_price: {
   img:"🤫",
   text:function(){
-    R.quietPrice = true;
+    R.quietPrice = true; M.talkedQuiet = true;
     if(M.quietVoiceless){
       var v;
       if(R.talkPrice){
@@ -964,7 +971,7 @@ ask_quiet_price: {
 ask_quiet_way: {
   img:"🤫",
   text:function(){
-    R.quietWay = true;
+    R.quietWay = true; M.talkedQuiet = true;
     if(M.quietVoiceless){
       var v;
       if(R.talkWay){
@@ -1021,7 +1028,7 @@ ask_quiet_way: {
 ask_quiet_voice: {
   img:"🤫",
   text:function(){
-    R.quietVoice = true;
+    R.quietVoice = true; M.talkedQuiet = true;
     if(M.quietVoiceless){
       return "声のことを聞くと、彼はメモ帳の新しい頁を開いた。\n\n『声は、お代の方に入っていた』\n\nそれだけ書いて、頁を閉じた。\n\nいつ、どうしてかは、書かれなかった。";
     }
@@ -2072,27 +2079,31 @@ img:"📱",
 text:function(){
 var t = "スマホの写真を、見返した。\n";
 var found = false;
-if(hasPhoto("crow")){
+if(hasPhoto("crow") && M.reviewedPhotos.indexOf("crow")<0){
   t += "\nカラスの写真。枝の上に、五羽いた。\n撮った時、枝には三羽だった。数え直しても、五羽だった。";
   addNote("photo_crow","カラスの写真には、五羽写っていた。撮った時は、三羽だった。");
+  M.reviewedPhotos.push("crow");
   M.expPhoto = true; found = true;
 }
-if(hasPhoto("pair")){
+if(hasPhoto("pair") && M.reviewedPhotos.indexOf("pair")<0){
   t += "\n二人連れの写真。二人の座る席の間に、もう一人分の肩が、端に写っていた。";
   addNote("photo_pair","二人連れの写真に、もう一人分の肩が写っていた。");
+  M.reviewedPhotos.push("pair");
   M.expPhoto = true; found = true;
 }
-if(hasPhoto("shop")){
+if(hasPhoto("shop") && M.reviewedPhotos.indexOf("shop")<0){
   t += "\n店内の写真。窓際の席に、コップが二つ写っていた。\nあの時、窓際にいたのは、一人だった。";
   addNote("photo_shop","店内の写真で、窓際の席にコップが二つ写っていた。");
+  M.reviewedPhotos.push("shop");
   M.expPhoto = true; found = true;
 }
-if(hasPhoto("dog") && M.loops===2){
+if(hasPhoto("dog") && M.loops===2 && M.reviewedPhotos.indexOf("dog")<0){
   t += "\n犬の写真。名札には「しろ」と読めた。\n今夜の犬の名札は、「くろ」だった。";
   addNote("photo_dog","犬の写真の名札は「しろ」。今夜の名札は「くろ」だった。");
+  M.reviewedPhotos.push("dog");
   M.expPhoto = true; found = true;
 }
-if(!found) t += "\n特に、おかしなところはなかった。";
+if(!found) t = "スマホの写真を、見返した。\n\n前に見た時と、同じだった。変わったところは、なかった。";
 saveAll();
 return t;
 },
@@ -2273,7 +2284,7 @@ function reachEnding(id){
 M.endings[id] = true;
 R.endedId = id;
 /* 静かな客は、この夜のどこかで声を払う（次周から筆談） */
-if(M.metQuiet) M.quietVoiceless = true;
+if(M.metQuiet && (M.talkedQuiet || R.quietPrice || R.quietWay || R.quietVoice)) M.quietVoiceless = true;
 M.bringUnlocked = true;
 saveAll();
 }
