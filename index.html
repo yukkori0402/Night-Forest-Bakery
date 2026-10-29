@@ -358,9 +358,10 @@ function render(){
         var dsc = SCENES[c.to];
         if(dsc){
           var sig = (M.readSig || {})[c.to];
-          if(typeof sig === "number"){
+          var sigSet = (typeof sig === "number") ? [sig] : (Array.isArray(sig) ? sig : null);
+          if(sigSet){
             var pv = previewText(dsc);
-            if(pv !== null && textSig(pv) === sig) seenSame = true;
+            if(pv !== null && sigSet.indexOf(textSig(pv)) >= 0) seenSame = true;
           } else if(typeof dsc.text === "string"){
             seenSame = true;
           }
@@ -379,7 +380,12 @@ function render(){
   });
   M.read[R.scene] = true;
   if(!M.readSig) M.readSig = {};
-  M.readSig[R.scene] = textSig(text);
+  var sigArr = M.readSig[R.scene];
+  if(typeof sigArr === "number") sigArr = [sigArr];
+  if(!Array.isArray(sigArr)) sigArr = [];
+  var sgNow = textSig(text);
+  if(sigArr.indexOf(sgNow) < 0){ sigArr.push(sgNow); if(sigArr.length > 12) sigArr = sigArr.slice(sigArr.length - 12); }
+  M.readSig[R.scene] = sigArr;
   saveAll();
   /* 見えない制限時間（最終局面専用）：時間切れで自動的に進む */
   if(sc.timeout && !R.reread){
