@@ -211,7 +211,7 @@ function newRun(){
     trustShop: 2, trustTalk: 2, trustQuiet: 2, liedShop: false,
     metChild: false, metPair: false, metName: false, metNew: false, metFormer: false,
     phoneDone: false, talkClock: 0, guestsGone: false,
-    explored: 0, recordsRead: false, roomEntered: false, caught: false, recordsVisits: 0, kitchenVisits: 0, leftVisits: 0, umbrellaVisits: 0, diaryVisits: 0, roomVisits: 0, hideSpot: "", ownPriceWorry: false, ownPriceAsked: false, tookPhotos: [], photoAlienShown: false,
+    explored: 0, recordsRead: false, roomEntered: false, caught: false, recordsVisits: 0, kitchenVisits: 0, leftVisits: 0, umbrellaVisits: 0, diaryVisits: 0, roomVisits: 0, hideSpot: "", ownPriceWorry: false, ownPriceAsked: false, noteChecked: false, tookPhotos: [], photoAlienShown: false,
     kuroBought: false, paidName: false, kuroAte: false,
     gaveMorning: false,
     final: false, finalBroken: false, finalSawBuyback: false,
@@ -247,6 +247,7 @@ function takeScatterable(){ for(var i=0;i<SCATTERABLE.length;i++){ if(hasBread(S
 function hasEdible(){ return ["marui","oto","kinou","wake","nioi","omosa"].some(function(id){ return hasBread(id); }); }
 function edibleId(){ var ids=["marui","oto","kinou","wake","nioi","omosa"]; for(var i=0;i<ids.length;i++){ if(hasBread(ids[i])) return ids[i]; } return ""; }
 function addNote(id, text){
+  if(!Array.isArray(M.notes)) M.notes = [];
   for(var i=0;i<M.notes.length;i++){ if(M.notes[i].id===id) return; }
   M.notes.push({id:id, text:text});
   if(id.indexOf("slip")>=0) M.slips = Math.max(M.slips||0, M.notes.filter(function(n){ return n.id.indexOf("slip")>=0; }).length);
@@ -896,8 +897,34 @@ choices:[
     {t:"他のお客さんのことを聞く", to:"ask_shop_guests", if:function(){ return !R.shopGuests; }},
     {t:"夜明けまでいてもいいか聞く", to:"ask_shop_stay", if:function(){ return !R.shopStay; }},
     {t:"この店の、持ち主のことを聞く", to:"buyback_talk", if:function(){ return M.truthSelf && M.truthShop && M.slips>=3; }, do:function(){ R.buybackFrom = "shop"; }},
+    {t:"手帳に書いた、店主の言い直しのことを聞く", to:"ask_shop_check", if:function(){ return M.slips>=3 && !R.noteChecked; }},
     {t:"席に戻る", to:"hub1"}
   ]
+},
+ask_shop_check: {
+  img:"🔔",
+  onEnter:function(){ R.noteChecked = true; },
+  text:function(){
+    var quotes = { shop_slip_price:"いつも、そうなんですよ", shop_slip_guests:"あなたも、もう何度も", shop_slip_stay:"いつもの席", slip_hide:"……また、来た" };
+    var qs = [];
+    (Array.isArray(M.notes) ? M.notes : []).forEach(function(n){ if(quotes[n.id] && qs.indexOf(quotes[n.id]) < 0) qs.push(quotes[n.id]); });
+    var q1 = qs.length ? qs[0] : "いつもの席";
+    var q2 = qs.length > 1 ? qs[1] : "";
+    var t = "「あの」と、手帳を開いた。\n\n";
+    t += "「前に、言いかけたことがあって。『" + q1 + "』って」\n\n";
+    t += "店主の手が、止まった。カウンターを、拭く手だった。\n\n";
+    if(q2) t += "「それから、『" + q2 + "』とも」\n\n";
+    t += "店主は、少しだけ、目を伏せた。\n\n";
+    t += "「夜が長いと、言葉が、先に出ることがあります」\n\n";
+    t += "「お客様は、よく書かれるんですね」\n\n";
+    t += "手帳を閉じると、店主はもう笑っていた。\n\n";
+    t += "席に戻ろうとすると、後ろから声がした。\n\n";
+    t += "「……何度目でも、同じことを言うんですね。私は」";
+    addNote("slip_check","店主に、手帳の言い直しを確かめた。店主は『何度目でも、同じことを言うんですね』と言った。");
+    saveAll();
+    return t;
+  },
+choices:[ {t:"話を続ける", to:"ask_shop"} ]
 },
 ask_shop_price2: {
   img:"🔔",
