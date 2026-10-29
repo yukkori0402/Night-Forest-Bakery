@@ -341,6 +341,9 @@ function render(){
   var wasRead = !!M.read[R.scene];
   if(sc.onEnter) sc.onEnter();
   var text = (typeof sc.text === "function") ? sc.text() : sc.text;
+  var sigSetBefore = (M.readSig && M.readSig[R.scene]) || null;
+  if(typeof sigSetBefore === "number") sigSetBefore = [sigSetBefore];
+  var seenBefore = !!(wasRead && sigSetBefore && (sigSetBefore.indexOf(textSig(text)) >= 0 || sigSetBefore.indexOf(textSig(sigText(text))) >= 0));
   imgEl.textContent = sc.img || "🥐";
   var html = "";
   if(sc.badge) html += '<span class="ending-badge' + (sc.horror ? " horror" : "") + '">' + esc(sc.badge) + '</span>';
@@ -377,8 +380,6 @@ function render(){
         var sigSet = (typeof sig === "number") ? [sig] : (Array.isArray(sig) ? sig : null);
         if(sigSet){
           if(pvText !== null && (sigSet.indexOf(textSig(pvText)) >= 0 || sigSet.indexOf(textSig(sigText(pvText))) >= 0)) seenSame = true;
-        } else {
-          seenSame = true;
         }
       }
     }
@@ -414,8 +415,8 @@ function render(){
     var tkT = navToken; var destT = sc.timeout.to; var msecT = sc.timeout.sec * 1000; var curT = R.scene;
     setTimeout(function(){ if(tkT===navToken && R.scene===curT) go(destT); }, msecT);
   }
-  /* 既読スキップ：既読の単一選択シーンだけを自動で送る（選択肢の前では必ず止まる） */
-  if(M.skip && wasRead && list.length === 1){
+  /* 既読スキップ：本文が前回と本当に同じ単一選択シーンだけを自動で送る（選択肢の前では必ず止まる） */
+  if(M.skip && seenBefore && list.length === 1){
     var btn = choicesEl.querySelector("button");
     if(btn){
       var tk = navToken;
