@@ -188,7 +188,7 @@ function newRun(){
     trustShop: 2, trustTalk: 2, trustQuiet: 2, liedShop: false,
     metChild: false, metPair: false, metName: false, metNew: false, metFormer: false,
     phoneDone: false,
-    explored: 0, recordsRead: false, roomEntered: false, caught: false, recordsVisits: 0, kitchenVisits: 0, leftVisits: 0, umbrellaVisits: 0, diaryVisits: 0, roomVisits: 0, hideSpot: "",
+    explored: 0, recordsRead: false, roomEntered: false, caught: false, recordsVisits: 0, kitchenVisits: 0, leftVisits: 0, umbrellaVisits: 0, diaryVisits: 0, roomVisits: 0, hideSpot: "", ownPriceWorry: false, ownPriceAsked: false,
     kuroBought: false, paidName: false, kuroAte: false,
     gaveMorning: false,
     final: false, finalBroken: false, finalSawBuyback: false,
@@ -763,6 +763,7 @@ ask_shop: {
   text: "カウンターへ行った。\n\n店主は、向こう側で静かに立っていた。\n\n「何か、ご用ですか」",
   choices:[
     {t:"自分のお代のことを、もう一度聞く", to:"ask_shop_price2", if:function(){ return !R.shopPrice2; }},
+    {t:"自分のお代に、何が入っているのか聞く", to:"ask_shop_ownprice", if:function(){ return R.ownPriceWorry && !R.ownPriceAsked; }},
     {t:"他のお客さんのことを聞く", to:"ask_shop_guests", if:function(){ return !R.shopGuests; }},
     {t:"夜明けまでいてもいいか聞く", to:"ask_shop_stay", if:function(){ return !R.shopStay; }},
     {t:"この店の、持ち主のことを聞く", to:"buyback_talk", if:function(){ return M.truthSelf && M.slips>=3; }, do:function(){ R.buybackFrom = "shop"; }},
@@ -782,6 +783,17 @@ ask_shop_price2: {
   },
   choices:[ {t:"話を続ける", to:"ask_shop"} ]
 },
+ask_shop_ownprice: {
+  img:"🔔",
+  onEnter:function(){ R.ownPriceAsked = true; },
+  text:function(){
+    addNote("own_price_unknown","自分のお代に何が入っているか聞いたが、店主は答えなかった。");
+    saveAll();
+    return "「私のお代には、どんなものが入っているんですか」\n\n店主は、私の顔を、少しの間見ていた。\n\n「……お客様は、よく声が出ていますね」\n\nそれだけだった。\n\n結局、私のお代が何なのかは、分からないままだった。";
+  },
+  choices:[ {t:"話を続ける", to:"ask_shop"} ]
+},
+
 ask_shop_guests: {
   img:"🔔",
   onEnter:function(){ R.shopGuests = true; },
@@ -1030,11 +1042,13 @@ ask_quiet_voice: {
   text:function(){
     R.quietVoice = true; M.talkedQuiet = true;
     if(M.quietVoiceless){
-      return "声のことを聞くと、彼はメモ帳の新しい頁を開いた。\n\n『声は、お代の方に入っていた』\n\nそれだけ書いて、頁を閉じた。\n\nいつ、どうしてかは、書かれなかった。";
+      R.ownPriceWorry = true;
+      addNote("quiet_voice_price","静かな客は、声をお代に払っていた。");
+      return "声のことを聞くと、彼はメモ帳の新しい頁を開いた。\n\n『声は、お代の方に入っていた』\n\nそれだけ書いて、頁を閉じた。\n\nいつ、どうしてかは、書かれなかった。\n\n――私のお代は、なんだったんだろう。\n\n自分の喉元に、手が触れていた。声は、出た。当たり前なのに、ほっとした。";
     }
     return "「声が、小さいですね」\n\nそう聞くと、静かな客は少しだけ笑った。\n\n「出にくいんだ。前より、ずっと」\n\n「……そのうち、出なくなる気がする」\n\n理由は、言わなかった。";
   },
-  choices:[ {t:"話を続ける", to:"ask_quiet"} ]
+choices:[ {t:"話を続ける", to:"ask_quiet"} ]
 },
 share_quiet: {
   img:"🍞",
@@ -2110,6 +2124,31 @@ return t;
 choices:[ {t:"席に戻る", to:"hub1"} ]
 },
 
+share_child: {
+img:"🍞",
+text: "分け合うパンを、半分に割った。自然に、二つに割れた。\n\n半分を、子どもの客の前に置いた。「よかったら」\n\n子どもは、目を丸くして、それから嬉しそうに頬張った。\n\n「半分こ、好き。ぼく、いつも半分しか食べられないから」",
+choices:[
+{t:"話を続ける", to:"ask_child", do:function(){ R.sharedWake = true; R.wakeHalf = true; }},
+{t:"席に戻る", to:"hub1", do:function(){ R.sharedWake = true; R.wakeHalf = true; }}
+]
+},
+share_name: {
+img:"🍞",
+text: "分け合うパンを、半分に割った。自然に、二つに割れた。\n\n半分を、隅の席の客の前に置いた。「よかったら」\n\n客は、半分を、しばらく見ていた。\n\n「……分けてくれる人は、久しぶりだ」\n\nそれから、ゆっくり食べ始めた。",
+choices:[
+{t:"話を続ける", to:"ask_name", do:function(){ R.sharedWake = true; R.wakeHalf = true; }},
+{t:"席に戻る", to:"hub1", do:function(){ R.sharedWake = true; R.wakeHalf = true; }}
+]
+},
+share_pair: {
+img:"🍞",
+text: "分け合うパンを、半分に割った。自然に、二つに割れた。\n\n半分を、二人連れの前に置いた。「よかったら」\n\n二人は顔を見合わせて、半分を、さらに半分に割った。\n\n「ありがとうございます」\n\n二人の声が、少しだけ重なって聞こえた。",
+choices:[
+{t:"話を続ける", to:"ask_pair", do:function(){ R.sharedWake = true; R.wakeHalf = true; }},
+{t:"席に戻る", to:"hub1", do:function(){ R.sharedWake = true; R.wakeHalf = true; }}
+]
+},
+
 /* ---------- 子どもの客 ---------- */
 ask_child: {
 img:"🧒",
@@ -2125,6 +2164,7 @@ choices:[
 {t:"空いている席のことを聞く", to:"ask_child_seat", if:function(){ return !R.childSeat; }},
 {t:"店主のことを聞く", to:"ask_child_shop", if:function(){ return !R.childShop; }},
 {t:"白い犬のことを聞く", to:"ask_child_dog", if:function(){ return !R.childDog; }},
+{t:"分け合うパンの半分を渡す", to:"share_child", if:function(){ return hasBread("wake") && !R.sharedWake; }},
 {t:"席に戻る", to:"hub1"}
 ]
 },
@@ -2161,6 +2201,7 @@ return "二人連れは、小声で話していた。時々、二人同時にこ
 choices:[
 {t:"帰り道のことを、もう一度聞く", to:"ask_pair_way", if:function(){ return !R.pairWay; }},
 {t:"二人の写真を撮らせてもらう", to:"photo_pair", if:function(){ return !hasPhoto("pair"); }},
+{t:"分け合うパンの半分を渡す", to:"share_pair", if:function(){ return hasBread("wake") && !R.sharedWake; }},
 {t:"席に戻る", to:"hub1"}
 ]
 },
@@ -2193,6 +2234,7 @@ choices:[
 {t:"昔の店のことを聞く", to:"ask_name_old", if:function(){ return !R.nameOld; }},
 {t:"森のことを聞く", to:"ask_name_forest", if:function(){ return !R.nameForest; }},
 {t:"自分の顔のことを聞く", to:"ask_name_self", if:function(){ return !R.nameSelf; }},
+{t:"分け合うパンの半分を渡す", to:"share_name", if:function(){ return hasBread("wake") && !R.sharedWake; }},
 {t:"席に戻る", to:"hub1"}
 ]
 },
