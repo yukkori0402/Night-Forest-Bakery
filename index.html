@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>夜の森のパン屋</title>
+<meta name="description" content="午前0時、森の奥にだけ現れるパン屋。静かなホラー要素のある、選択肢で進む物語。">
+<meta property="og:title" content="夜の森のパン屋">
+<meta property="og:description" content="午前0時、森の奥にだけ現れるパン屋。静かなホラー要素のある、選択肢で進む物語。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://yukkori0402.github.io/Night-Forest-Bakery/">
+<meta property="og:image" content="https://yukkori0402.github.io/Night-Forest-Bakery/ogp.png">
+<meta name="twitter:card" content="summary_large_image">
 <style>
   :root{
     --bg:#f3e7cf; --bg2:#ecd9b8; --card:#fffaf0; --card2:#fff5e2;
@@ -399,9 +406,11 @@ function render(){
       }
     }
     if(list.length === 1){
+      var bigDest = destId && (destId.indexOf("end_") === 0 || destId === "true_dawn" || destId === "memo_stay" || destId === "buyback_yes" || destId === "owner_farewell" || destId === "morning_farewell" || destId === "gate_home" || destId === "gate_auto" || destId === "gate_name" || destId === "gate_ir" || destId === "crumb_arrive" || destId === "final_walk");
+      var contLabel = bigDest ? c.t : "つづける";
       b.className = "continue" + (seenSame ? " seen" : "");
-      b.innerHTML = "つづける" + (seenSame ? '<span class="seen-tag">前に読んだ</span>' : '');
-      b.setAttribute("aria-label", "つづける");
+      b.innerHTML = esc(contLabel) + (seenSame ? '<span class="seen-tag">前に読んだ</span>' : '');
+      b.setAttribute("aria-label", contLabel);
     } else {
       b.className = "choice" + (seenSame ? " seen" : "");
       b.innerHTML = '<span class="arrow">▸</span>' + esc(c.t) + (seenSame ? '<span class="seen-tag">前に読んだ</span>' : '');
@@ -425,6 +434,13 @@ function render(){
   if(sigArr.length > 24) sigArr = sigArr.slice(sigArr.length - 24);
   M.readSig[R.scene] = sigArr;
   saveAll();
+  if(R.scene === "end_screen" && !R.reread && R.endedId){
+    var shareBtn = document.createElement("button");
+    shareBtn.type = "button"; shareBtn.className = "choice";
+    shareBtn.innerHTML = '<span class="arrow">▸</span>Xで共有する';
+    shareBtn.addEventListener("click", function(){ shareEnding(); });
+    choicesEl.appendChild(shareBtn);
+  }
   /* 見えない制限時間（最終局面専用）：時間切れで自動的に進む */
   if(sc.timeout && !R.reread){
     var tkT = navToken; var destT = sc.timeout.to; var msecT = sc.timeout.sec * 1000; var curT = R.scene;
@@ -461,7 +477,6 @@ function titleNoteText(){
 }
 function showTitle(){
   clearTimers();
-  R.scene = ""; saveAll();
   setStatusVisible(false);
   document.body.classList.remove("late");
   imgEl.textContent = "🌙";
@@ -477,6 +492,7 @@ function showTitle(){
     html += "扉の向こうでは、焼きたての匂いがした。";
   }
   html += '</div>';
+  html += '<div style="font-size:13px;color:var(--muted);margin:2px 0 10px">※ 静かなホラー要素のある物語です</div>';
   if(!hasName){
     html += '<label style="font-size:14px;color:var(--ink2)">あなたの名前</label>';
     html += '<input class="namein" id="nameInput" type="text" maxlength="12" placeholder="名前を入力してください" autocomplete="off">';
@@ -503,6 +519,7 @@ function showTitle(){
         if(!v){ alert("名前を入力してください。"); return; }
         M.name = v; saveAll();
       }
+      R = newRun(); saveAll();
       chooseReason();
     });
   }
@@ -583,6 +600,14 @@ var ENDING_DEFS = [
   {id:"shopmorning", title:"店主の朝", epi:"epi_tm_1", hint:"朝の味を知るのは、店主だけではない"},
   {id:"trueend", title:"朝の食卓", epi:"epi_tr_1", hint:"店の明かりが、朝まで届かない夜がある"}
 ];
+function shareEnding(){
+  var def = null;
+  for(var i=0;i<ENDING_DEFS.length;i++){ if(ENDING_DEFS[i].id===R.endedId) def = ENDING_DEFS[i]; }
+  var count = Object.keys(M.endings || {}).length;
+  var text = "『夜の森のパン屋』で結末" + count + "/11『" + (def ? def.title : "") + "』に着きました";
+  var url = "https://yukkori0402.github.io/Night-Forest-Bakery/";
+  if(typeof window !== "undefined" && window.open) window.open("https://twitter.com/intent/tweet?text=" + encodeURIComponent(text) + "&url=" + encodeURIComponent(url), "_blank");
+}
 function openCollection(){
   var html = "<h2>これまでの結末</h2>";
   var any = false;
@@ -684,7 +709,7 @@ choices:[
 },
 pro_shop: {
   img:"🏮",
-  text: "木々の向こうに、温かい明かりが見えた。\n\n小さな店だった。窓は湯気で曇って、中の明かりがぼんやり滲んでいた。ドアの上には木の看板があり、『パン屋』とだけ書いてある。\n\n午前0時を過ぎた森の奥で、焼きたてのパンの匂いがした。お腹の底が、きゅっと鳴った。\n\n白い犬は店の前で座り、それ以上は近づかなかった。店の中を一度だけ見て、それから私を見た。",
+  text: "木々の向こうに、温かい明かりが見えた。\n\n小さな店だった。窓は湯気で曇って、中の明かりがぼんやり滲んでいた。ドアの上には木の看板があり、『パン屋』とだけ書いてある。\n\n午前0時を過ぎた森の奥で、焼きたてのパンの匂いがした。お腹の底が、きゅっと鳴った。\n\n窓の湯気の向こうに、人影があった。ドアも開けていないのに、こちらを向いている気がした。\n\n白い犬は店の前で座り、それ以上は近づかなかった。店の中を一度だけ見て、それから私を見た。",
 choices:[ {t:"店のドアを開ける", to:"arrival"} ]
 },
 arrival: {
@@ -1668,6 +1693,7 @@ var t = "「" + (names[R.endedId] || "") + "」\n\n";
 if(R.reread){ t += "その夜のことは、ここまでだった。"; return t;}
 t += "夜は終わった。……終わった、はずだった。\n\n";
 t += "手帳には、今夜のことがいくつか書き残されている。\n次の夜、店はまた午前0時に現れる。";
+if(M.loops===0 && Object.keys(M.endings||{}).length===1) t += "\n\n―― 次の夜は、何かが違う気がした。";
 if(M.pendingNudge){
   t += "\n\n――手帳の最後の頁に、自分の字で、こう書かれていた。\n\n『" + M.pendingNudge + "』";
   M.pendingNudge = "";
@@ -1676,7 +1702,8 @@ if(M.pendingNudge){
 return t;
 },
 choices:[
-{t:"次の夜へ", to:null, if:function(){ return!R.reread;}, do:function(){ finishRun();}},
+{t:"もう一度、森へ", to:null, if:function(){ return !R.reread && M.loops===0 && Object.keys(M.endings||{}).length===1; }, do:function(){ finishRun(); }},
+{t:"次の夜へ", to:null, if:function(){ return !R.reread && !(M.loops===0 && Object.keys(M.endings||{}).length===1); }, do:function(){ finishRun(); }},
 {t:"タイトルに戻る", to:null, if:function(){ return R.reread;}, do:function(){ R = newRun(); saveAll(); showTitle();}},
 {t:"これまでの結末を見る", to:null, do:function(){ openCollection();}}
 ]
