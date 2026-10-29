@@ -106,6 +106,8 @@
   .choices .choice:nth-child(5){animation-delay:.32s;}
   button.choice:hover{box-shadow:inset 3px 0 0 var(--bread);}
   button.choice.seen{opacity:.55;}
+  button.continue.seen{opacity:.55;}
+  button.continue .seen-tag{float:none;margin-left:10px;}
   .seen-tag{float:right;font-size:11px;color:var(--muted);letter-spacing:.08em;padding-top:4px;}
   body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:5;
     background:radial-gradient(120% 90% at 50% 40%, transparent 55%, rgba(58,38,14,.20) 100%);}
@@ -303,6 +305,12 @@ function textSig(t){
   for(var i=0;i<str.length;i++){ h = (((h*33) ^ str.charCodeAt(i)) >>> 0); }
   return h;
 }
+function sigText(t){
+  var str = String(t);
+  var words = ["お腹が空いて、立っているのがやっとだった。", "お腹が空いていた。集中が続かない。", "少し、お腹が空いてきた。"];
+  for(var i=0;i<words.length;i++){ str = str.split(words[i]).join(""); }
+  return str.replace(/\n{3,}/g, "\n\n").replace(/\s+$/, "");
+}
 function previewText(sc){
   if(typeof sc.text === "string") return sc.text;
   var snapM = JSON.stringify(M), snapR = JSON.stringify(R), t = null;
@@ -347,27 +355,38 @@ function render(){
   list.forEach(function(c){
     var b = document.createElement("button");
     b.type = "button";
-    if(list.length === 1){
-      b.className = "continue";
-      b.textContent = "つづける";
-      b.setAttribute("aria-label", "つづける");
-    } else {
-      b.className = "choice";
-      var seenSame = false;
-      if(typeof c.to === "string" && M.read[c.to]){
-        var dsc = SCENES[c.to];
-        if(dsc){
-          var sig = (M.readSig || {})[c.to];
-          var sigSet = (typeof sig === "number") ? [sig] : (Array.isArray(sig) ? sig : null);
-          if(sigSet){
-            var pv = previewText(dsc);
-            if(pv !== null && sigSet.indexOf(textSig(pv)) >= 0) seenSame = true;
-          } else {
-            seenSame = true;
-          }
+    var seenSame = false;
+    if(c.to){
+      var destId = null, pvText = null;
+      var snapM2 = JSON.stringify(M), snapR2 = JSON.stringify(R);
+      try {
+        if(c.do) c.do();
+        var toId = (typeof c.to === "function") ? c.to() : c.to;
+        if(toId && SCENES[toId]){
+          destId = toId;
+          R.scene = toId;
+          var dsc2 = SCENES[toId];
+          if(dsc2.onEnter) dsc2.onEnter();
+          pvText = (typeof dsc2.text === "function") ? dsc2.text() : dsc2.text;
+        }
+      } catch(e){ destId = null; pvText = null; }
+      try { M = JSON.parse(snapM2); R = JSON.parse(snapR2); saveAll(); } catch(e2){}
+      if(destId && M.read[destId]){
+        var sig = (M.readSig || {})[destId];
+        var sigSet = (typeof sig === "number") ? [sig] : (Array.isArray(sig) ? sig : null);
+        if(sigSet){
+          if(pvText !== null && (sigSet.indexOf(textSig(pvText)) >= 0 || sigSet.indexOf(textSig(sigText(pvText))) >= 0)) seenSame = true;
+        } else {
+          seenSame = true;
         }
       }
-      if(seenSame) b.className = "choice seen";
+    }
+    if(list.length === 1){
+      b.className = "continue" + (seenSame ? " seen" : "");
+      b.innerHTML = "つづける" + (seenSame ? '<span class="seen-tag">前に読んだ</span>' : '');
+      b.setAttribute("aria-label", "つづける");
+    } else {
+      b.className = "choice" + (seenSame ? " seen" : "");
       b.innerHTML = '<span class="arrow">▸</span>' + esc(c.t) + (seenSame ? '<span class="seen-tag">前に読んだ</span>' : '');
     }
     b.addEventListener("click", function(){
@@ -383,8 +402,10 @@ function render(){
   var sigArr = M.readSig[R.scene];
   if(typeof sigArr === "number") sigArr = [sigArr];
   if(!Array.isArray(sigArr)) sigArr = [];
-  var sgNow = textSig(text);
-  if(sigArr.indexOf(sgNow) < 0){ sigArr.push(sgNow); if(sigArr.length > 12) sigArr = sigArr.slice(sigArr.length - 12); }
+  var sgRaw = textSig(text), sgNorm = textSig(sigText(text));
+  if(sigArr.indexOf(sgRaw) < 0) sigArr.push(sgRaw);
+  if(sigArr.indexOf(sgNorm) < 0) sigArr.push(sgNorm);
+  if(sigArr.length > 24) sigArr = sigArr.slice(sigArr.length - 24);
   M.readSig[R.scene] = sigArr;
   saveAll();
   /* 見えない制限時間（最終局面専用）：時間切れで自動的に進む */
