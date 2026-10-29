@@ -204,7 +204,7 @@ function newRun(){
     trustShop: 2, trustTalk: 2, trustQuiet: 2, liedShop: false,
     metChild: false, metPair: false, metName: false, metNew: false, metFormer: false,
     phoneDone: false,
-    explored: 0, recordsRead: false, roomEntered: false, caught: false, recordsVisits: 0, kitchenVisits: 0, leftVisits: 0, umbrellaVisits: 0, diaryVisits: 0, roomVisits: 0, hideSpot: "", ownPriceWorry: false, ownPriceAsked: false,
+    explored: 0, recordsRead: false, roomEntered: false, caught: false, recordsVisits: 0, kitchenVisits: 0, leftVisits: 0, umbrellaVisits: 0, diaryVisits: 0, roomVisits: 0, hideSpot: "", ownPriceWorry: false, ownPriceAsked: false, tookPhotos: [], photoAlienShown: false,
     kuroBought: false, paidName: false, kuroAte: false,
     gaveMorning: false,
     final: false, finalBroken: false, finalSawBuyback: false,
@@ -256,7 +256,7 @@ function isRain(){ return M.loops % 3 === 2; }
 function guestName(){ var ns = ["あきら","さくら","れん","ゆず"]; return ns[M.loops % 4]; }
 function prevGuestName(){ var ns = ["あきら","さくら","れん","ゆず"]; return ns[(M.loops + 3) % 4]; }
 function hasPhoto(id){ return M.photos.indexOf(id) >= 0; }
-function takePhoto(id){ if(!hasPhoto(id)) M.photos.push(id); }
+function takePhoto(id){ if(!hasPhoto(id)) M.photos.push(id); if(R.tookPhotos && R.tookPhotos.indexOf(id) < 0) R.tookPhotos.push(id); }
 function finalReady(){ return M.truthForest && M.truthShop && M.truthSelf && M.slips >= 4 && M.expScatter && M.expNoScatter && (M.expCaught || M.expPhoto); }
 function smellPending(){ return R.bring==="onigiri" && !R.bringEaten && !R.bringShared && !R.smellDone && !hasBread("nioi"); }
 function destAfterOut(){ return smellPending() ? "smell_check" : "back_shop"; }
@@ -2120,36 +2120,46 @@ choices:[ {t:"森へ進む", to:"out_fork"} ]
 photo_view: {
 img:"📱",
 text:function(){
-var t = "スマホの写真を、見返した。\n";
-var found = false;
-if(hasPhoto("crow") && M.reviewedPhotos.indexOf("crow")<0){
-  t += "\nカラスの写真。枝の上に、五羽いた。\n撮った時、枝には三羽だった。数え直しても、五羽だった。";
-  addNote("photo_crow","カラスの写真には、五羽写っていた。撮った時は、三羽だった。");
-  M.reviewedPhotos.push("crow");
-  M.expPhoto = true; found = true;
-}
-if(hasPhoto("pair") && M.reviewedPhotos.indexOf("pair")<0){
-  t += "\n二人連れの写真。二人の座る席の間に、もう一人分の肩が、端に写っていた。";
-  addNote("photo_pair","二人連れの写真に、もう一人分の肩が写っていた。");
-  M.reviewedPhotos.push("pair");
-  M.expPhoto = true; found = true;
-}
-if(hasPhoto("shop") && M.reviewedPhotos.indexOf("shop")<0){
-  t += "\n店内の写真。窓際の席に、コップが二つ写っていた。\nあの時、窓際にいたのは、一人だった。";
-  addNote("photo_shop","店内の写真で、窓際の席にコップが二つ写っていた。");
-  M.reviewedPhotos.push("shop");
-  M.expPhoto = true; found = true;
-}
-if(hasPhoto("dog") && M.loops===2 && M.reviewedPhotos.indexOf("dog")<0){
-  t += "\n犬の写真。名札には「しろ」と読めた。\n今夜の犬の名札は、「くろ」だった。";
-  addNote("photo_dog","犬の写真の名札は「しろ」。今夜の名札は「くろ」だった。");
-  M.reviewedPhotos.push("dog");
-  M.expPhoto = true; found = true;
-}
-if(!found) t = "スマホの写真を、見返した。\n\n前に見た時と、同じだった。変わったところは、なかった。";
-saveAll();
-return t;
-},
+    R.lookedPhotos = true;
+    var fresh = M.photos.filter(function(p){ return M.reviewedPhotos.indexOf(p) < 0; });
+    var segs = [];
+    if(fresh.length){
+      if(fresh.indexOf("dog") >= 0 && M.loops===2){
+        segs.push("白い犬の写真。名札には「しろ」と書いてある。\n\n今夜の犬の名札は――「くろ」。白い犬なのに。");
+        addNote("photo_dog","写真の白い犬の名札は「しろ」。今夜の名札は「くろ」だった。");
+        M.expPhoto = true;
+      }
+      if(fresh.indexOf("crow") >= 0){
+        segs.push("店先のカラスの写真。3羽、写っている。\n\nでも、さっき数えたカラスは――何羽だったか、思い出せなかった。店主が「5羽いますよ」と言った声だけが、耳に残った。");
+        addNote("photo_crow","カラスの写真には3羽。今夜、店主は「5羽いますよ」と言った。");
+        M.expPhoto = true;
+      }
+      if(fresh.indexOf("pair") >= 0){
+        segs.push("二人連れの写真。二人の間に、もう一人分の肩が写っていた。\n\n撮った時、そんなものは見えなかった。");
+        addNote("photo_pair","二人連れの写真に、もう一人分の肩が写っていた。");
+        M.expPhoto = true;
+      }
+      if(fresh.indexOf("shop") >= 0){
+        segs.push("店の中の写真。窓際の客と、カウンター近くの客が写っていた。\n\n窓の外は真っ黒で、何も映っていなかった。来た時、窓の向こうには森が見えたはずだった。");
+        addNote("photo_shop","店内の写真で、窓の外は真っ黒だった。来た時、窓の向こうには森が見えた。");
+        M.expPhoto = true;
+      }
+      fresh.forEach(function(p){ M.reviewedPhotos.push(p); });
+      saveAll();
+    }
+    var tookList = Array.isArray(R.tookPhotos) ? R.tookPhotos : [];
+    var alien = M.photos.filter(function(p){ return tookList.indexOf(p) < 0; });
+    if(alien.length && !R.photoAlienShown){
+      R.photoAlienShown = true;
+      var names = {dog:"白い犬", crow:"カラス", pair:"二人連れ", shop:"店の中", shelf:"棚のパン"};
+      var list = alien.map(function(p){ return names[p] || "知らない場所"; }).join("。");
+      var head = "スマホの写真を、開いた。\n\n覚えのない写真があった。" + list + "。\n\n撮った記憶が、ない。なのに、どれも、この店と、この森の写真だった。";
+      if(segs.length) return head + "\n\n" + segs.join("\n\n");
+      return head + "\n\nおかしなところは、なかった。撮った記憶がない、ということ以外は。";
+    }
+    if(segs.length) return "スマホの写真を、見返した。\n\n" + segs.join("\n\n");
+    return "スマホの写真を、見返した。\n\n前に見た時と、同じだった。変わったところは、なかった。";
+  },
 choices:[ {t:"席に戻る", to:"hub1"} ]
 },
 
