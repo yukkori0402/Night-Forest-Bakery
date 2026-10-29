@@ -105,6 +105,8 @@
   .choices .choice:nth-child(4){animation-delay:.24s;}
   .choices .choice:nth-child(5){animation-delay:.32s;}
   button.choice:hover{box-shadow:inset 3px 0 0 var(--bread);}
+  button.choice.seen{opacity:.55;}
+  .seen-tag{float:right;font-size:11px;color:var(--muted);letter-spacing:.08em;padding-top:4px;}
   body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:5;
     background:radial-gradient(120% 90% at 50% 40%, transparent 55%, rgba(58,38,14,.20) 100%);}
   body.late::after{background:radial-gradient(120% 90% at 50% 40%, transparent 48%, rgba(20,16,34,.40) 100%);}
@@ -338,7 +340,13 @@ function render(){
       b.setAttribute("aria-label", "つづける");
     } else {
       b.className = "choice";
-      b.innerHTML = '<span class="arrow">▸</span>' + esc(c.t);
+      var seenSame = false;
+      if(typeof c.to === "string" && M.read[c.to]){
+        var dsc = SCENES[c.to];
+        if(dsc && typeof dsc.text === "string") seenSame = true;
+      }
+      if(seenSame) b.className = "choice seen";
+      b.innerHTML = '<span class="arrow">▸</span>' + esc(c.t) + (seenSame ? '<span class="seen-tag">前に読んだ</span>' : '');
     }
     b.addEventListener("click", function(){
       clearTimers();
