@@ -362,7 +362,7 @@ function render(){
           if(sigSet){
             var pv = previewText(dsc);
             if(pv !== null && sigSet.indexOf(textSig(pv)) >= 0) seenSame = true;
-          } else if(typeof dsc.text === "string"){
+          } else {
             seenSame = true;
           }
         }
