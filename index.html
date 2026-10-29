@@ -6,69 +6,93 @@
 <title>夜の森のパン屋</title>
 <style>
   :root{
-    --bg:#0b0f0d; --bg2:#131a15; --card:#182119; --card2:#1f2b20;
-    --warm:#f0b45a; --warm2:#ffd98f; --cream:#f6ead2; --muted:#b7ab93;
-    --line:#3a4a3c; --danger:#c0533f; --shadow:rgba(0,0,0,.55);
+    --bg:#f3e7cf; --bg2:#ecd9b8; --card:#fffaf0; --card2:#fff5e2;
+    --ink:#4a3826; --ink2:#6d5840; --muted:#9a8563;
+    --bread:#c98a4b; --bread2:#a5662a; --warm:#f0b45a; --warm2:#ffd98f;
+    --line:#dfc9a0; --line2:#cbb27f;
+    --danger:#b0532f; --night:#2e2a3a;
+    --shadow:rgba(120,84,30,.18);
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;}
   body{
-    min-height:100vh; color:var(--cream);
+    min-height:100vh; color:var(--ink);
     font-family:"Hiragino Mincho ProN","Yu Mincho",YuMincho,"Noto Serif JP",serif;
     background:
-      radial-gradient(900px 480px at 85% -10%, rgba(240,180,90,.16), transparent 60%),
-      radial-gradient(700px 500px at -10% 110%, rgba(64,110,74,.20), transparent 60%),
+      radial-gradient(900px 480px at 85% -10%, rgba(240,180,90,.35), transparent 60%),
+      radial-gradient(700px 500px at -10% 110%, rgba(201,138,75,.25), transparent 60%),
       linear-gradient(180deg,var(--bg) 0%,var(--bg2) 100%);
     line-height:1.9; letter-spacing:.02em;
+    transition:background 1.2s ease;
+  }
+  body.late{
+    background:
+      radial-gradient(900px 480px at 85% -10%, rgba(84,74,120,.35), transparent 60%),
+      radial-gradient(700px 500px at -10% 110%, rgba(46,42,58,.4), transparent 60%),
+      linear-gradient(180deg,#ddd0bd 0%,#c9b995 100%);
   }
   .wrap{max-width:720px;margin:0 auto;padding:20px 16px 56px;}
-  header{text-align:center;padding:26px 8px 10px;}
-  .moon{font-size:30px;color:var(--warm2);}
-  h1{margin:6px 0 2px;font-size:clamp(26px,6vw,38px);font-weight:600;color:var(--warm2);letter-spacing:.12em;}
-  .subtitle{color:var(--muted);font-size:14px;margin:0 0 8px;}
-  .status{
-    display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center;
-    margin:14px auto 6px;max-width:640px;
-  }
-  .chip{
-    background:rgba(24,33,25,.9);border:1px solid var(--line);border-radius:999px;
-    padding:4px 12px;font-size:13px;color:var(--cream);white-space:nowrap;
-  }
-  .chip b{color:var(--warm2);font-weight:600;}
-  .dawnbar{max-width:640px;margin:10px auto 0;height:8px;border-radius:999px;background:#26312a;border:1px solid var(--line);overflow:hidden;}
-  .dawnbar > div{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,#5a6f8e,#c98a4b,#ffd98f);transition:width .8s ease;}
-  .dawnlabel{max-width:640px;margin:4px auto 0;display:flex;justify-content:space-between;font-size:11px;color:var(--muted);}
+  header{text-align:center;padding:22px 8px 6px;}
+  .moon{font-size:28px;}
+  h1{margin:4px 0 2px;font-size:clamp(26px,6vw,38px);font-weight:600;color:var(--bread2);letter-spacing:.14em;}
+  .subtitle{color:var(--ink2);font-size:14px;margin:0 0 4px;}
+  .titlenote{color:var(--muted);font-size:12px;margin:0;min-height:1.4em;}
+  .status{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center;margin:12px auto 4px;max-width:640px;}
+  .chip{background:rgba(255,250,240,.92);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:13px;color:var(--ink);white-space:nowrap;}
+  .chip b{color:var(--bread2);font-weight:600;}
   main.card{
-    margin-top:20px;background:linear-gradient(180deg,var(--card2),var(--card));
+    margin-top:18px;background:linear-gradient(180deg,var(--card2),var(--card));
     border:1px solid var(--line);border-radius:18px;box-shadow:0 18px 44px var(--shadow);
     padding:26px 22px 24px;
   }
-  .scene-img{font-size:34px;text-align:center;margin-bottom:6px;}
-  .scene-text{font-size:clamp(16px,4.4vw,18px);white-space:pre-wrap;min-height:220px;}
-  .scene-text .uneasy{color:#e8a496;}
+  .scene-img{font-size:32px;text-align:center;margin-bottom:4px;}
+  .scene-text{font-size:clamp(16px,4.4vw,18px);white-space:pre-wrap;min-height:200px;}
   .choices{margin-top:22px;display:grid;gap:12px;}
+  .choices.single{display:block;margin-top:12px;text-align:center;}
+  button.continue{appearance:none;cursor:pointer;background:transparent;border:none;color:var(--muted);font:inherit;font-size:14px;letter-spacing:.18em;padding:10px 18px;}
+  button.continue:hover,button.continue:active{color:var(--bread2);}
   button.choice, button.restart{
     appearance:none;width:100%;text-align:left;cursor:pointer;
-    background:#243327;color:var(--cream);border:1px solid #4b5f4e;border-radius:14px;
-    padding:16px 18px;font-size:16px;font-family:inherit;line-height:1.6;min-height:56px;
+    background:#fdf3dd;color:var(--ink);border:1px solid var(--line2);border-radius:14px;
+    padding:15px 18px;font-size:16px;font-family:inherit;line-height:1.6;min-height:54px;
     transition:transform .08s ease, background .2s ease, border-color .2s ease;
   }
-  button.choice:hover, button.choice:active{background:#2f4534;border-color:var(--warm);}
+  button.choice:hover, button.choice:active{background:#fbe9c8;border-color:var(--bread);}
   button.choice:active{transform:scale(.99);}
-  button.choice .arrow{color:var(--warm);margin-right:8px;}
-  button.restart{text-align:center;background:var(--warm);color:#241806;border-color:var(--warm);font-weight:700;}
-  button.restart:hover{background:var(--warm2);}
-  .ending-badge{
-    display:inline-block;border:1px solid var(--warm);color:var(--warm2);
-    border-radius:999px;padding:4px 14px;font-size:13px;letter-spacing:.14em;margin-bottom:12px;
+  button.choice .arrow{color:var(--bread);margin-right:8px;}
+  button.restart{text-align:center;background:var(--bread);color:#fff8ea;border-color:var(--bread);font-weight:700;}
+  button.restart:hover{background:var(--bread2);}
+  .toolbar{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:16px;}
+  button.tool{
+    appearance:none;cursor:pointer;background:rgba(255,250,240,.9);color:var(--ink2);
+    border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:13px;font-family:inherit;
   }
-  .ending-badge.horror{border-color:var(--danger);color:#f0a294;}
-  .ending-title{font-size:clamp(22px,5.6vw,30px);margin:0 0 14px;color:var(--warm2);}
-  .ending-badge.horror + .ending-title{color:#f0a294;}
-  .note{margin-top:18px;font-size:13px;color:var(--muted);text-align:center;}
+  button.tool.on{background:var(--bread);color:#fff8ea;border-color:var(--bread);}
+  .ending-badge{display:inline-block;border:1px solid var(--bread);color:var(--bread2);border-radius:999px;padding:4px 14px;font-size:13px;letter-spacing:.14em;margin-bottom:12px;}
+  .ending-badge.horror{border-color:var(--danger);color:var(--danger);}
+  .ending-title{font-size:clamp(22px,5.6vw,30px);margin:0 0 14px;color:var(--bread2);}
+  .ending-badge.horror + .ending-title{color:var(--danger);}
+  .note{margin-top:16px;font-size:13px;color:var(--muted);text-align:center;}
+  input.namein{
+    width:100%;padding:14px 16px;font-size:17px;font-family:inherit;color:var(--ink);
+    background:#fffdf6;border:1px solid var(--line2);border-radius:12px;margin:6px 0 4px;
+  }
+  .overlay{
+    position:fixed;inset:0;background:rgba(58,42,20,.45);display:none;z-index:40;
+    align-items:flex-start;justify-content:center;padding:24px 14px;overflow:auto;
+  }
+  .overlay.open{display:flex;}
+  .sheet{background:var(--card);border:1px solid var(--line);border-radius:16px;max-width:640px;width:100%;padding:22px 20px;box-shadow:0 24px 60px rgba(60,40,10,.35);}
+  .sheet h2{margin:0 0 10px;font-size:20px;color:var(--bread2);}
+  .sheet .entry{border-top:1px dashed var(--line);padding:10px 2px;font-size:15px;white-space:pre-wrap;}
+  .sheet .entry:first-of-type{border-top:none;}
+  .sheet .empty{color:var(--muted);font-size:14px;}
+  .coll-item{display:flex;justify-content:space-between;align-items:center;gap:10px;border-top:1px dashed var(--line);padding:10px 2px;}
+  .coll-item .t{font-size:16px;}
+  .coll-item .s{font-size:12px;color:var(--muted);}
   .fade{animation:fade .55s ease;}
   @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
-  @media (max-width:480px){ main.card{padding:22px 16px;} .scene-text{min-height:200px;} }
+  @media (max-width:480px){ main.card{padding:22px 16px;} .scene-text{min-height:180px;} }
 </style>
 </head>
 <body>
@@ -76,580 +100,2142 @@
   <header>
     <div class="moon" aria-hidden="true">☾ 🥐</div>
     <h1>夜の森のパン屋</h1>
-    <p class="subtitle">――午前0時にだけ現れる店で、夜明けまでに帰り道を見つける物語</p>
-    <div class="status">
-      <span class="chip" id="chapterChip">第1章</span>
-      <span class="chip">時刻 <b id="timeChip">午前0:00</b></span>
+    <p class="subtitle" id="subtitle">午前0時にだけ、森の奥で明かりが灯る</p>
+    <p class="titlenote" id="titlenote"></p>
+    <div class="status" id="statusbar" style="display:none">
+      <span class="chip">時刻 <b id="timeChip">午前0時すぎ</b></span>
       <span class="chip" id="itemsChip">持ち物：なし</span>
     </div>
-    <div class="dawnbar" aria-hidden="true"><div id="dawnFill"></div></div>
-    <div class="dawnlabel"><span>真夜中</span><span>夜明けが近づいている…</span><span>夜明け</span></div>
   </header>
 
   <main class="card fade" id="card">
     <div class="scene-img" id="sceneImg" aria-hidden="true">🌲</div>
     <div id="content"></div>
     <div class="choices" id="choices"></div>
-    <p class="note">選択によって物語と結末が変わります。音は出ません。</p>
+    <div class="toolbar" id="toolbar" style="display:none">
+      <button class="tool" id="btnNotebook" type="button">📖 手帳</button>
+      <button class="tool" id="btnSkip" type="button">既読スキップ：切</button>
+      <button class="tool" id="btnColl" type="button">これまでの結末</button>
+    </div>
+    <p class="note">音は出ません。</p>
   </main>
 </div>
 
+<div class="overlay" id="overlay"><div class="sheet" id="sheet"></div></div>
+
 <script>
 "use strict";
-/* ============ 状態（フラグ） ============
-   helped        : 店主の手伝いを引き受けた
-   helpedDeep    : 厨房で最後まで手伝った
-   memoryTraded  : 対価に「記憶」を渡した
-   memoryDeep    : 記憶を渡し切った（抵抗しなかった）
-   hasGlowing    : 光るパンを持っている
-   hasWarm       : 温かいパンを持っている
-   sharedBread   : パンを森の動物と分けた
-   hasBlackBread : 黒いパンを持っている
-   ateBlackBread : 黒いパンを食べた（取り返しがつかない）
-   learnedTruth  : 店主と前の客の真実を知った
-   lookedBack    : 帰り道で振り返った
-   kindness      : 優しい選択の蓄積
-   darkness      : 不穏な選択・出来事の蓄積
-========================================== */
-let S;
-function newState(){
+/* ================================================================
+   夜の森のパン屋 v2（核スライス・書き直し版）
+   保存キー: nfb_v2_meta（周回をまたぐ）/ nfb_v2_run（周回内）
+   ================================================================ */
+var META_KEY = "nfb_v2_meta";
+var RUN_KEY  = "nfb_v2_run";
+
+function loadJSON(key, fallback){
+  try{ var raw = localStorage.getItem(key); if(!raw) return fallback; var v = JSON.parse(raw); return (v===null||v===undefined)?fallback:v; }
+  catch(e){ return fallback; }
+}
+function saveJSON(key, val){ try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){} }
+
+function newMeta(){
   return {
-    helped:false, helpedDeep:false,
-    memoryTraded:false, memoryDeep:false,
-    hasGlowing:false, hasWarm:false, sharedBread:false,
-    hasBlackBread:false, ateBlackBread:false,
-    learnedTruth:false, lookedBack:false,
-    kindness:0, darkness:0
+    name: "", reason: "",
+    loops: 0,               // 完了した周回数
+    endings: {},            // 到達済みエンディング {id:true}
+    notes: [],              // 手帳メモ [{id,text}]
+    read: {},               // 既読シーン {id:true}
+    slips: 0,               // 記録した店主の綻びの数
+    quietVoiceless: false,  // 静かな客が声を失った（次周から筆談）
+    photos: [],             // 撮った写真の id（周回をまたぐ）
+    truthForest: false, truthShop: false, truthSelf: false,
+    expScatter: false, expNoScatter: false,
+    expCaught: false,
+    expPhoto: false,
+    recordsDeep: 0,
+    newGuestFate: "",
+    bringUnlocked: false,
+    finalArmed: false,
+    skip: false,
+    metTalk: false, metQuiet: false
   };
 }
-function applyFx(fx){
-  if(!fx) return;
-  for(const k in fx){
-    if(k==="kindness" || k==="darkness"){ S[k]+=fx[k]; }
-    else { S[k]=fx[k]; }
-  }
+function newRun(){
+  return {
+    scene: "", phase: 0, hunger: 0,
+    breads: [],            // 所持パン id 配列
+    tasted: false,         // 試食を食べた
+    askedWay: false,       // 店主に帰り道を聞いた
+    boughtBread: "",       // 買ったパン
+    paidPrice: "",         // 表の対価
+    metTalkRun: false,     // この周で常連客と話した
+    talkShop: false, talkPrice: false, talkWay: false,
+    shopPrice2: false, shopGuests: false, shopStay: false, waited: false,
+    quietPrice: false, quietWay: false, quietVoice: false, quietMetRun: false,
+    sharedWake: false,     // 分け合うパンを静かな客と分けた
+    heardKuro: false,      // 黒いパンについて聞いた
+    wakeHalf: false,       // 分け合うパンが半分になっている
+    looked: false,         // 外出で明かりを確かめた
+    forkChoice: "",        // 初回の外出で選んだ道
+    deepWent: false,       // 初回の外出で奥まで進んだ
+    peeked: false,         // 冊子を覗いた
+    noticedMaybe: false,   // 店主が気づいたかもしれない余韻
+    scattered: false,      // 終盤、欠片を落としながら出た
+    callItem: "",          // 呼びかけの「忘れ物」への対応 took/denied/shown
+    _pendingEat: "", _eatReturn: "",
+    bring: "", bringEaten: false, bringShared: false, smellDone: false,
+    trustShop: 2, trustTalk: 2, trustQuiet: 2, liedShop: false,
+    metChild: false, metPair: false, metName: false, metNew: false, metFormer: false,
+    phoneDone: false,
+    explored: 0, recordsRead: false, roomEntered: false, caught: false,
+    kuroBought: false, paidName: false, kuroAte: false,
+    gaveMorning: false,
+    final: false, finalBroken: false, finalSawBuyback: false,
+    reread: false,
+    endedId: ""
+  };
 }
-
-/* ============ シーン定義 ============
-   text は文字列、または state を受け取る関数（前の選択を本文に反映させるため）
-   choices: {label, next, fx, if(state)->bool}
-   ending: true のノードはエンディング表示になる
-====================================== */
-const SCENES = {
-  /* ---------- 第1章 夜の森 ---------- */
-  prologue:{
-    chapter:"第1章 ― 夜の森", time:"午前0:00", dawn:2, img:"🌲",
-    text:`気づいたとき、あなたは森の中にいた。
-
-山道を歩いていたはずなのに、いつの間にか、見覚えのない杉並木のあいだに立っている。スマートフォンは電池切れで、真っ黒な画面はあなたの顔だけをぼんやり映した。
-
-何度同じ方向へ歩いても、曲がりくねった細い道と、苔むした倒木と、同じ形の岩が現れる。
-
-――出口がないのではなく、この森が、あなたを外へ出す気がない。
-
-ふいに、鼻先をかすめたのは、焼きたてのパンの匂いだった。`,
-    choices:[
-      {label:"パンの匂いのする方へ歩く", next:"forest_voice"},
-      {label:"その場でしゃがみ、夜が明けるのを待つ", next:"forest_wait"}
-    ]
-  },
-  forest_wait:{
-    chapter:"第1章 ― 夜の森", time:"午前0:15", dawn:6, img:"🌲",
-    text:`待つことにした。けれど森の夜は、待つ者を放っておかない。
-
-目を閉じると、遠くで何かが歩く音がする。開けると止まる。閉じると、少しだけ近づく。
-三度目に目を閉じたとき、耳元で、自分の声がした。
-
-「――こっち」
-
-飛び起きたあなたの背後で、木々のあいだから、温かそうな小さな灯りが揺れていた。`,
-    choices:[
-      {label:"灯りに向かって走る", next:"bakery_arrival", fx:{darkness:1}},
-      {label:"ゆっくり、音を立てないように灯りへ近づく", next:"bakery_arrival"}
-    ]
-  },
-  forest_voice:{
-    chapter:"第1章 ― 夜の森", time:"午前0:20", dawn:8, img:"🦉",
-    text:`匂いを追って歩くと、頭上の枝でフクロウが一度だけ鳴いた。
-
-「戻りたいなら、明かりを数えるな」
-
-――今、フクロウが喋っただろうか。いや、そんなはずはない。そう自分に言い聞かせながら歩くうちに、木々の向こうに、小さな窓の灯りが見えてきた。
-
-灯りはひとつだけ。なのに、なぜか「数えるな」という言葉が、頭の隅で冷たく光っている。`,
-    choices:[
-      {label:"灯りのある小屋へ向かう", next:"bakery_arrival"},
-      {label:"立ち止まり、灯りが本当にひとつか確かめる", next:"bakery_two_lights"}
-    ]
-  },
-  bakery_two_lights:{
-    chapter:"第1章 ― 夜の森", time:"午前0:30", dawn:11, img:"🏮",
-    text:`目を凝らす。灯りは、ひとつ。
-
-――ではない。ふたつ、ある。ひとつは温かい橙色。もうひとつは、その少し奥で、青白く、瞬きもせずにこちらを見ている。
-
-青白い灯りの下には、店らしき影はない。ただ、まっすぐな「何か」が立っていて、あなたが灯りに気づいたことに、気づいている。
-
-橙色の灯りの方から、ドアベルの音がした。早く選べ、と言わんばかりに。`,
-    choices:[
-      {label:"橙色の灯りの店へ駆け込む", next:"bakery_arrival", fx:{darkness:1}},
-      {label:"青白い灯りを無視し、目を伏せて店へ歩く", next:"bakery_arrival", fx:{kindness:1}}
-    ]
-  },
-  bakery_arrival:{
-    chapter:"第1章 ― 夜の森", time:"午前0:40", dawn:15, img:"🥐",
-    text:`それは、パン屋だった。
-
-森の真ん中の空き地に、昼間なら素通りしてしまいそうな小さな店。窓からは湯気と灯りが漏れ、看板には、達筆とは言えない字でこう書かれている。
-
-『夜のパン屋　――午前0時から、夜明けまで』
-
-ドアを開けると、ベルが鳴った。店内はパンの匂いで満ちていて、カウンターの奥では、白い前掛けの店主が、こちらを見ていた。
-
-ずっと前から、あなたが来ることを知っていた、という顔で。`,
-    choices:[
-      {label:"「すみません、道に迷って……」と声をかける", next:"shopkeeper_meet"},
-      {label:"何も言わず、店の中をよく見る", next:"shop_look"}
-    ]
-  },
-  shop_look:{
-    chapter:"第1章 ― 夜の森", time:"午前0:50", dawn:18, img:"🍞",
-    text:`棚には焼きたてのパンが並んでいる。どれも美味しそうだ。ただ――
-
-一番奥の棚にだけ、値札の代わりに小さな木札が下がっていた。
-『お客さまの椅子』
-
-その棚の下には椅子が一脚だけ置かれていて、座面には、まだ人の温もりが残っているような窪みがあった。
-
-そのとき背後で店主が言った。
-
-「見ましたね」
-「大丈夫。座らなければ、まだお客さまです」`,
-    choices:[
-      {label:"振り返って店主と向き合う", next:"shopkeeper_meet", fx:{darkness:1, learnedTruth:false}},
-      {label:"椅子から目を逸らし、カウンターへ行く", next:"shopkeeper_meet"}
-    ]
-  },
-  /* ---------- 第2章 パン屋のルール ---------- */
-  shopkeeper_meet:{
-    chapter:"第2章 ― パン屋のルール", time:"午前1:00", dawn:24, img:"👤",
-    text:`店主は年配の男だった。笑うと目尻が下がる、穏やかな顔をしている。
-
-「迷い人ですね。この森はね、帰りたい人をすぐには帰さない。でも、うちのパンを買った人には、帰り道が見えるようになる」
-「夜明けまでに森を出てください。夜明けと一緒に、この店は消えます。……出られなかった人のことは、考えないほうがいい」
-
-店主は値札のないパンたちを、愛おしそうに撫でた。
-
-「うちではお金は受け取りません。代わりに、どちらかでお願いしています」`,
-    choices:[
-      {label:"「小さなお手伝い」をする ―― 厨房を手伝う", next:"kitchen", fx:{helped:true}},
-      {label:"「帰り道の記憶」を渡す ―― 今日ここへ来た道の記憶が、対価になる", next:"memory_trade", fx:{memoryTraded:true, darkness:1}}
-    ]
-  },
-  kitchen:{
-    chapter:"第2章 ― パン屋のルール", time:"午前1:30", dawn:32, img:"🔥",
-    text:`厨房は驚くほど普通だった。粉の匂い、オーブンの熱、並んだ生地。
-
-ただし、生地はあなたの手が離れたあとも、わずかに――呼吸するように、膨らんだり、しぼんだりしていた。
-
-「気にしないでください。夜の粉は、少しだけ生きています」
-「さあ、最後の窯です。焼き上がりを見届けたら、あなたのパンを選んでいい」
-
-店主はオーブンの前から離れない。あなたにできるのは、生地を運ぶか、火加減を見続けるか。`,
-    choices:[
-      {label:"最後まで残って、生地を運び続ける", next:"first_loaf", fx:{helpedDeep:true, kindness:1}},
-      {label:"火加減を見続ける（炎の中に、一瞬だけ人影のような揺らぎが見えた）", next:"first_loaf", fx:{darkness:1}}
-    ]
-  },
-  memory_trade:{
-    chapter:"第2章 ― パン屋のルール", time:"午前1:30", dawn:32, img:"🕯️",
-    text:`店主は小さな瓶を取り出し、あなたの額にそっと近づけた。
-
-瓶の中に、今日の夕方の景色が流れ込んでいく。駅前の坂道。コンビニの灯り。家までの道順。それらが、頭の奥から静かに抜けていく感覚。
-
-「安心してください。家に着けば、家のことは思い出します」
-「――『着けば』、ね」
-
-最後の一筋が抜ける直前、あなたは自分がどこに帰ろうとしていたのか、一瞬だけ、分からなくなった。`,
-    choices:[
-      {label:"途中で店主の手を止める（これ以上は渡さない）", next:"first_loaf", fx:{kindness:1}},
-      {label:"すべて渡し切る（帰れるなら、構わないと思った）", next:"first_loaf", fx:{memoryDeep:true, darkness:1}}
-    ]
-  },
-  first_loaf:{
-    chapter:"第2章 ― パン屋のルール", time:"午前2:00", dawn:40, img:"🍞",
-    text:(s)=>`窯の扉が開き、朝一番ならぬ「帰り道のパン」が焼き上がった。
-
-店主は棚から二種類のパンを取り、あなたの前に置いた。
-
-ひとつは、ほのかに光るパン。持つと、足元の闇が少しだけ退く。
-もうひとつは、ずっと温かいパン。両手で包むと、誰かと分け合いたくなる温かさだった。
-
-「選んでください。帰り道は、パンの数だけしか歩けません」
-${s.memoryTraded ? "\n（記憶を渡したあなたには、なぜか二つとも「懐かしい」気がした。）" : ""}`,
-    choices:[
-      {label:"光るパンを選ぶ（道を照らすパン）", next:"animal", fx:{hasGlowing:true}},
-      {label:"温かいパンを選ぶ（分け合えるパン）", next:"animal", fx:{hasWarm:true}}
-    ]
-  },
-  /* ---------- 第3章 夜明けまで ---------- */
-  animal:{
-    chapter:"第3章 ― 夜明けまで", time:"午前2:30", dawn:50, img:"🦊",
-    text:(s)=>{
-      let base = `店を出て森を歩き始めてすぐ、茂みから子ギツネが現れた。肋骨が浮くほど痩せて、あなたのパンをじっと見ている。\n\n`;
-      if(s.hasWarm){
-        base += `温かいパンの匂いが、夜の冷気に広がっていく。子ギツネは震えながらも、決して近づいてはこない。森の動物は、人から「奪う」ことはしないらしい。\n\n分けるかどうかは、あなた次第だった。`;
-      } else {
-        base += `光るパンに怯えるように、子ギツネは一歩下がった。けれど空腹には勝てないらしく、光の届かないところから、ずっとこちらを見ている。\n\nパンのかけらなら、光は弱まらないはずだ。分けるかどうかは、あなた次第だった。`;
-      }
-      return base;
-    },
-    choices:[
-      {label:"パンを半分、分けてあげる", next:"black_bread", fx:{sharedBread:true, kindness:1}},
-      {label:"分けずに先を急ぐ（夜明けまで、時間がない）", next:"black_bread", fx:{darkness:1}}
-    ]
-  },
-  black_bread:{
-    chapter:"第3章 ― 夜明けまで", time:"午前3:00", dawn:58, img:"🌑",
-    text:(s)=>`歩き続けると、道の真ん中に、パン屋の裏口らしき扉が立っていた。周りに建物はないのに、扉だけが、森の中に。
-
-半開きの扉の向こうは真っ暗で、その暗闇の床に、パンがひとつ、落ちていた。
-
-真っ黒なパン。焼き過ぎではない。光を吸い込むように黒く、近づくと、耳の奥で小さく――噛む音がした。誰も噛んでいないのに。
-
-${s.sharedBread ? "後ろで子ギツネが短く鳴いた。行くな、と言っているように聞こえた。" : "拾えば、帰り道が近くなる。そんな確信が、理由もなく湧いてきた。"}`,
-    choices:[
-      {label:"黒いパンを拾う", next:"faceless_customer", fx:{hasBlackBread:true, darkness:1}},
-      {label:"拾わず、扉を閉めて先へ進む", next:"faceless_customer", fx:{kindness:1}}
-    ]
-  },
-  faceless_customer:{
-    chapter:"第3章 ― 夜明けまで", time:"午前3:25", dawn:65, img:"🚪",
-    text:`扉の先の小道で、パン屋に戻る「客」とすれ違った。
-
-スーツ姿の人だった。手にはパン屋の紙袋。けれど、その人の顔は――のっぺりと、何もなかった。目も、鼻も、口もない。なのに、その人は確かに「こちらを見て」、紙袋を大事そうに抱え直した。
-
-すれ違いざま、口のないその人の喉のあたりから、声だけがした。
-
-「あまいにおい。もうすぐ、きみの番だね」`,
-    choices:[
-      {label:"「どういう意味ですか」と問い詰める", next:"shopkeeper_truth", fx:{learnedTruth:true}},
-      {label:"何も聞かず、足早にその場を離れる", next:"shopkeeper_truth", fx:{darkness:1}}
-    ]
-  },
-  shopkeeper_truth:{
-    chapter:"第3章 ― 夜明けまで", time:"午前3:45", dawn:72, img:"🕰️",
-    text:(s)=>{
-      let t = `気づくと、あなたは再びパン屋の前にいた。森の道は、店へ戻るようにできているらしい。\n\n店主はカウンターで、来ないはずの次の客のために、パンを並べ替えていた。\n\n`;
-      if(s.learnedTruth){
-        t += `「あの人はね、去年の迷い人です。夜明けまでに帰れなかった」\n店主は穏やかに言った。\n「帰れなかった人は、顔から少しずつ、こちらの住人になっていく。……私も最初は、迷い人でした」\n\n店主は笑った。目尻が下がる、いつもの笑顔で。けれどその笑顔には、もう「口」しかなかった。目が、いつの間にか、ない。\n\n「さあ。夜明けまで、あと少しです」`;
-      } else {
-        t += `「お帰りなさい。……いえ、まだ『お帰り』は早いですね」\n店主はいつも通り穏やかだった。ただ、さっきより少しだけ、声が若くなっている気がした。気のせいだと思いたかった。\n\n「さあ。夜明けまで、あと少しです」`;
-      }
-      return t;
-    },
-    choices:[
-      {label:"店主の勧める「近道」を聞く", next:"black_offer"},
-      {label:"近道は聞かず、自分の足で歩くと告げる", next:"black_offer", fx:{kindness:1}}
-    ]
-  },
-  black_offer:{
-    chapter:"第3章 ― 夜明けまで", time:"午前4:10", dawn:80, img:"🌑",
-    text:(s)=>{
-      let t = `店主は奥から、黒いパンをひとつ取り出して、あなたの前に置いた。\n\n「これを食べれば、一瞬で家の前に着きます。代金は要りません。その代わり――」\n\n店主は、あなたの顔をじっと見た。\n\n「ほんの少しだけ、あなたを、いただきます」\n\n`;
-      if(s.hasBlackBread){
-        t += `不思議なことに、あなたの手元にも同じ黒いパンがある。店のものと、手元のもの。二つの黒いパンは、呼吸を合わせるように、同時に小さく膨らんだ。`;
-      } else {
-        t += `黒いパンからは、焼きたての甘い匂いがした。空腹と疲労が、考えるより先に手を伸ばさせようとする。`;
-      }
-      return t;
-    },
-    choices:[
-      {label:"黒いパンを食べる（早く帰りたい）", next:"horror_path", fx:{ateBlackBread:true, darkness:2}},
-      {label:"食べない。パンを押し返す", next:"dawn_path"}
-    ]
-  },
-  horror_path:{
-    chapter:"第3章 ― 夜明けまで", time:"午前4:30", dawn:88, img:"🏠",
-    text:`黒いパンは、噛んだ瞬間に味がしなかった。味の代わりに、遠くでドアベルが鳴る音がした。
-
-目を開けると、あなたは自宅の玄関に立っていた。やっと帰れた。夜明けの光が窓から差し込み、すべてが終わったように思えた。
-
-――ただ、冷蔵庫のモーター音が止まっている。時計の秒針が止まっている。窓の外では、朝日が昇る途中で、ずっと止まっている。
-
-そして台所から、焼きたてのパンの匂いがした。誰もいないはずの台所から、あなたの声で、こう聞こえた。
-
-「いらっしゃいませ」`,
-    choices:[
-      {label:"台所へ行く", next:"ending_horror"}
-    ]
-  },
-  trapped_path:{
-    chapter:"第3章 ― 夜明けまで", time:"午前5:00", dawn:99, img:"🌑",
-    text:`門をくぐった瞬間、黒いパンが手の中で溶けるように消えた。
-
-「消えたなら、もう大丈夫だ」
-
-そう思いたくて、あなたは朝の道を急いだ。家の玄関の前で、やっと息をつく。
-
-――そのとき、ポケットの中で、何か温かいものが、小さく脈打った。
-
-消えたのではない。黒いパンは、姿を変えて、あなたについてきたのだ。`,
-    choices:[
-      {label:"家の中へ入る", next:"ending_horror"}
-    ]
-  },
-  dawn_path:{
-    chapter:"第3章 ― 夜明けまで", time:"午前4:30", dawn:88, img:"🌄",
-    text:(s)=>{
-      let t = `店主は少しだけ寂しそうに笑い、黒いパンを仕舞った。\n「それがいい。……私も、昔はそう言えたんです」\n\n店の外では、鳥の声がし始めていた。夜明けは近い。最後の道は二手に分かれている。\n\n`;
-      if(s.hasGlowing){
-        t += `光るパンが、左の小道を弱く照らしている。光に従えば、遠回りでも確実に進めそうだ。右手からは川の音がする。近道らしいが、真っ暗だ。`;
-      } else {
-        t += `左の小道は遠回りだが、空がわずかに白んでいる方向へ続いている。右手からは川の音がする。近道らしいが、足元が見えない。`;
-      }
-      return t;
-    },
-    choices:[
-      {label:"左の小道を行く（遠回りでも、明るい方へ）", next:"final_moment", fx:{kindness:1}},
-      {label:"右の近道を行く（川の音を頼りに）", next:"final_moment", fx:{darkness:1}}
-    ]
-  },
-  final_moment:{
-    chapter:"第3章 ― 夜明けまで", time:"午前4:50", dawn:95, img:"🌅",
-    text:`空が白み始めた。後ろでは、パン屋の灯りが弱くなっていく。
-
-あと少しで森を抜けられる。その確信と一緒に、強い誘惑が湧いた。
-
-振り返れば、あの店をもう一度見られる。店主の顔を、最後にもう一度だけ確認できる。なぜか「確認しなければいけない」気がして、首の後ろが冷たくなった。
-
-森の出口まで、あと十歩。`,
-    choices:[
-      {label:"振り返らずに歩き続ける", next:"final_gate"},
-      {label:"振り返って、店を見る", next:"final_gate", fx:{lookedBack:true, darkness:1}}
-    ]
-  },
-  final_gate:{
-    chapter:"第3章 ― 夜明けまで", time:"午前5:00", dawn:99, img:"🌳",
-    text:(s)=>{
-      let t = ``;
-      if(s.lookedBack){
-        t += `振り返った先に、パン屋はなかった。空き地があるだけだった。\n\nただ、空き地の真ん中に店主だけが立っていて、こちらに向かって、深く、深くお辞儀をしていた。顔を上げる気配が、いつまでも、なかった。\n\n前を向くと、木々が門のように開いた出口が見えた。\n\n`;
-      } else {
-        t += `振り返らなかったあなたに、背後からベルの音が一度だけ、別れのように鳴った。\n\n前には、木々が門のように開いた出口が見えた。\n\n`;
-      }
-      if(s.hasBlackBread && !s.ateBlackBread){
-        t += `そのとき、手元の黒いパンが重く脈打った。持ったまま門をくぐれば、何が起きるか分からない。――まだ、返しに行く時間は、ほんの少しだけある。`;
-      } else {
-        t += `門をくぐれば、朝の世界だ。`;
-      }
-      return t;
-    },
-    choices:[
-      {label:"門をくぐって、森を出る", next:"ENDING_GATE"},
-      {label:"黒いパンを店主に返しに行く", next:"ending_free",
-        if:(s)=>s.hasBlackBread && !s.ateBlackBread && s.learnedTruth},
-      {label:"黒いパンを持ったまま、門をくぐる", next:"trapped_path",
-        if:(s)=>s.hasBlackBread && !s.ateBlackBread}
-    ]
-  },
-
-  /* ---------- エンディング ---------- */
-  ending_horror:{
-    ending:true, horror:true, badge:"ホラーエンディング",
-    chapter:"エンディング", time:"――", dawn:100, img:"🥐",
-    title:(s)=> s.ateBlackBread ? "新しい店主" : "持ち帰ってしまったもの",
-    text:(s)=>{
-      if(!s.ateBlackBread){
-        return `家に帰り着き、その日は一日、何事もなく過ごした。
-
-――何事もなく、過ごしたはずだった。
-
-夜、午前0時。眠っていたあなたは、パンの焼ける匂いで目を覚ます。自宅の台所で、あなた自身の手が、意識とは無関係に生地をこねていた。冷蔵庫には入れた覚えのない「夜の粉」。棚には、並べた覚えのないパン。
-
-そして玄関のドアベルが、鳴った。あなたの家に、ドアベルはないのに。
-
-「――こっち」と、フクロウの声がした。
-
-森は、あなたを持ち帰らせることで、あなたの家へ引っ越してきたのだ。
-この物語の続きは、今夜から、あなたの家で始まる。`;
-      }
-      return `台所に、あなたが立っていた。
-
-白い前掛けをして、あなたの顔で、あなたの声で、次の「迷い人」を待っている。あなたが声をかけても、その人は穏やかに笑うだけだった。目尻が下がる、穏やかな笑顔で。
-
-その瞬間、理解した。黒いパンは「対価」だったのではない。あれは「引継ぎ」だったのだ。食べた者の居場所と、店主の居場所が、入れ替わる。
-
-――あなたの体は、その夜、無事に家へ帰った。帰ったのは、体だけだったが。
-
-次の夜。午前0時。森の真ん中で、新しいパン屋の灯りがともる。
-窓の向こうで、前の店主だったものが、自由なはずの闇の中へ、顔のないまま消えていく。
-
-そしてあなたは、カウンターの奥で微笑んでいる。
-棚の奥の椅子には、もう、あなたの温もりの窪みができていた。
-
-最初の客が、ドアベルを鳴らすまで、あと少し。`;
-    }
-  },
-  ending_free:{
-    ending:true, badge:"秘密のエンディング",
-    chapter:"エンディング", time:"午前5:05", dawn:100, img:"🌅",
-    title:"店主を解放する朝",
-    text:`走って店へ戻り、黒いパンをカウンターに置いた。
-
-「これ、返すよ。……あんたも、帰りなよ」
-
-店主は長いこと黙っていた。やがて、その顔に、目が、鼻が、口が、ひとつずつ戻ってきた。何十年も忘れていたはずの、自分の顔だった。
-
-夜明けの光が店に差し込み、パン屋は光の粒になって消えていく。最後に店主は、焼きたてパンをひとつ、あなたの胸に押し込んだ。
-
-家に帰り着き、パンを割ると、中から小さな紙が落ちた。
-
-『ありがとう。もう、店は開きません』
-
-その夜から、森にパン屋が現れることは、二度となかった。`
-  },
-  ending_warm:{
-    ending:true, badge:"温かいエンディング",
-    chapter:"エンディング", time:"午前5:10", dawn:100, img:"🦊",
-    title:"温かい朝",
-    text:`門の向こうは、見慣れた朝の道だった。
-
-振り返ると、森の入り口で子ギツネが見送っていた。あなたの分けたパンのおかげで、その足取りは来たときよりずっと確かだった。
-
-家に帰り着き、眠って、昼過ぎに目を覚ます。夢だったのだろう、と思いかけたとき、玄関に小さな紙袋が置かれていることに気づいた。
-
-中には温かいパンがひとつ。添えられたメモには、こうあった。
-
-『分けてくれて、ありがとうございました。また迷ったら、今度はお客さんとしてどうぞ』
-
-パンは、どこか懐かしい味がした。`
-  },
-  ending_safe:{
-    ending:true, badge:"通常エンディング",
-    chapter:"エンディング", time:"午前5:10", dawn:100, img:"🌄",
-    title:"静かな帰り道",
-    text:`門をくぐると、そこは早朝の住宅街だった。
-
-コンビニの灯り、新聞配達のバイクの音、遠くの踏切。当たり前の朝の音が、こんなにもありがたいものだったとは。
-
-家に帰り着いたあなたは、そのまま眠り込んだ。昼に目を覚ましたとき、昨夜のことは夢のように曖昧だった。
-
-ただひとつだけ、はっきり覚えている。森の中で聞いた、あの言葉だ。
-
-「戻りたいなら、明かりを数えるな」
-
-今夜もどこかで、午前0時にだけ開く店があるのかもしれない。それでもあなたは、もう二度と、あの森には近づかないだろう。
-
-――近づかないと、心に決めた。決めたはずなのに、夜になると、パンの匂いを探してしまう自分が、少しだけ、怖かった。`
-  },
-  ending_late:{
-    ending:true, horror:true, badge:"間に合わないエンディング",
-    chapter:"エンディング", time:"午前5:30", dawn:100, img:"🌫️",
-    title:"夜明けのない森",
-    text:`空は明るくなった。なのに、森は終わらなかった。
-
-何時間歩いても、同じ杉並木、同じ倒木、同じ形の岩。スマートフォンの時計は午前5時30分で止まり、太陽は昇る途中で動かない。
-
-やがて、遠くに小さな灯りが見えた。パン屋だ。今はもう、昼のはずなのに。
-
-店のドアが開き、店主が手招きをした。その顔には、目が増えていた。あなたの選択のひとつひとつを、ずっと数えていたような目だった。
-
-「おかえりなさい」
-「夜明けまでに出られなかった人はね、ここで夜が来るのを待つんです。……永遠に、ね」
-
-森の奥で、フクロウが鳴いた。今度ははっきりと聞き取れた。
-
-「だから言ったでしょう。明かりを、数えるなと」`
-  }
-};
-
-/* エンディング分岐の決定（門をくぐったとき） */
-function resolveGate(){
-  if(S.ateBlackBread) return "ending_horror";
-  if(S.darkness >= 4) return "ending_late";
-  if(S.sharedBread && (S.helped || S.helpedDeep)) return "ending_warm";
-  if(S.kindness >= 2 || S.hasGlowing) return "ending_safe";
-  if(S.memoryDeep) return "ending_late";
-  return "ending_safe";
+var M = loadJSON(META_KEY, null); if(!M || typeof M !== "object") M = newMeta();
+var R = loadJSON(RUN_KEY, null);  if(!R || typeof R !== "object") R = newRun();
+/* 旧セーブとの互換：欠けている項目を補う */
+(function(){
+  var dm = newMeta(); for(var k in dm){ if(M[k]===undefined) M[k]=dm[k]; }
+  var dr = newRun();  for(var k2 in dr){ if(R[k2]===undefined) R[k2]=dr[k2]; }
+})();
+
+var PHASES = ["午前0時すぎ","午前1時","午前2時","午前3時","午前4時","夜明け前"];
+var BREAD_NAMES = { marui:"丸いパン", oto:"音のしないパン", kinou:"昨日のパン", wake:"分け合うパン", nioi:"匂いのないパン", omosa:"重さの変わるパン", kuro:"黒いパン" };
+
+function saveAll(){ saveJSON(META_KEY, M); saveJSON(RUN_KEY, R); }
+function hasBread(id){ return R.breads.indexOf(id) >= 0; }
+function giveBread(id){ if(!hasBread(id)) R.breads.push(id); }
+function takeBread(id){ var i = R.breads.indexOf(id); if(i>=0) R.breads.splice(i,1); }
+var SCATTERABLE = ["marui","oto","wake","omosa"];  // くずの材料にできるパン（黒いパンは不可）
+function hasScatterable(){ return SCATTERABLE.some(function(id){ return hasBread(id); }); }
+function takeScatterable(){ for(var i=0;i<SCATTERABLE.length;i++){ if(hasBread(SCATTERABLE[i])){ takeBread(SCATTERABLE[i]); return; } } }
+function hasEdible(){ return ["marui","oto","kinou","wake","nioi","omosa"].some(function(id){ return hasBread(id); }); }
+function edibleId(){ var ids=["marui","oto","kinou","wake","nioi","omosa"]; for(var i=0;i<ids.length;i++){ if(hasBread(ids[i])) return ids[i]; } return ""; }
+function addNote(id, text){
+  for(var i=0;i<M.notes.length;i++){ if(M.notes[i].id===id) return; }
+  M.notes.push({id:id, text:text});
+  if(id.indexOf("slip")===0) M.slips = M.notes.filter(function(n){ return n.id.indexOf("slip")===0; }).length;
 }
-
-/* ============ 描画 ============ */
-const contentEl = document.getElementById("content");
-const choicesEl = document.getElementById("choices");
-const cardEl = document.getElementById("card");
-const chapterChip = document.getElementById("chapterChip");
-const timeChip = document.getElementById("timeChip");
-const itemsChip = document.getElementById("itemsChip");
-const dawnFill = document.getElementById("dawnFill");
-const sceneImg = document.getElementById("sceneImg");
-
-function itemsText(){
-  const items = [];
-  if(S.hasGlowing) items.push("光るパン");
-  if(S.hasWarm) items.push("温かいパン");
-  if(S.hasBlackBread && !S.ateBlackBread) items.push("黒いパン");
-  if(S.memoryTraded) items.push("記憶の空き瓶");
-  return "持ち物：" + (items.length ? items.join("、") : "なし");
+function bumpHunger(n){ R.hunger = Math.max(0, Math.min(3, R.hunger + n)); }
+function hungerWord(){
+  if(R.hunger>=3) return "お腹が空いて、立っているのがやっとだった。";
+  if(R.hunger==2) return "お腹が空いていた。集中が続かない。";
+  if(R.hunger==1) return "少し、お腹が空いてきた。";
+  return "";
 }
+function pname(){ return M.name ? M.name : "わたし"; }
+function loopN(){ return M.loops + 1; }
+function isRain(){ return M.loops % 3 === 2; }
+function guestName(){ var ns = ["あきら","さくら","れん","ゆず"]; return ns[M.loops % 4]; }
+function prevGuestName(){ var ns = ["あきら","さくら","れん","ゆず"]; return ns[(M.loops + 3) % 4]; }
+function hasPhoto(id){ return M.photos.indexOf(id) >= 0; }
+function takePhoto(id){ if(!hasPhoto(id)) M.photos.push(id); }
+function finalReady(){ return M.truthForest && M.truthShop && M.truthSelf && M.slips >= 4 && M.expScatter && M.expNoScatter && (M.expCaught || M.expPhoto); }
+function smellPending(){ return R.bring==="onigiri" && !R.bringEaten && !R.bringShared && !R.smellDone && !hasBread("nioi"); }
+function destAfterOut(){ return smellPending() ? "smell_check" : "back_shop"; }
 
-function render(id){
-  let scene = SCENES[id];
-  if(!scene){ id = "prologue"; scene = SCENES[id]; }
-  if(id === "ENDING_GATE"){ render(resolveGate()); return; }
+/* ============ 画面描画 ============ */
+var contentEl = document.getElementById("content");
+var choicesEl = document.getElementById("choices");
+var imgEl = document.getElementById("sceneImg");
+var cardEl = document.getElementById("card");
+var statusEl = document.getElementById("statusbar");
+var timeEl = document.getElementById("timeChip");
+var itemsEl = document.getElementById("itemsChip");
+var toolbarEl = document.getElementById("toolbar");
+var skipBtn = document.getElementById("btnSkip");
+var overlayEl = document.getElementById("overlay");
+var sheetEl = document.getElementById("sheet");
+var navToken = 0;
+var skipTimer = null;
 
-  chapterChip.textContent = scene.chapter;
-  timeChip.textContent = scene.time;
-  itemsChip.textContent = itemsText();
-  dawnFill.style.width = (scene.dawn || 0) + "%";
-  sceneImg.textContent = scene.img || "🌲";
+function setStatusVisible(v){
+  statusEl.style.display = v ? "flex" : "none";
+  toolbarEl.style.display = v ? "flex" : "none";
+}
+function refreshStatus(){
+  timeEl.textContent = PHASES[Math.min(R.phase, PHASES.length-1)];
+  var names = R.breads.map(function(b){
+    var n = BREAD_NAMES[b] || b;
+    if(b==="wake" && R.wakeHalf) n += "（半分）";
+    return n;
+  });
+  var extraItems = [];
+  if(R.bring==="onigiri" && !R.bringEaten && !R.bringShared) extraItems.push("おにぎり");
+  if(R.bring==="tea") extraItems.push("お茶のペットボトル");
+  var allItems = names.concat(extraItems);
+  itemsEl.textContent = "持ち物：" + (allItems.length ? allItems.join("、") : "なし");
+  document.body.classList.toggle("late", R.phase>=3);
+}
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 
+function clearTimers(){ navToken++; if(skipTimer){ clearTimeout(skipTimer); skipTimer = null; } }
+
+function go(id){ clearTimers(); R.scene = id; saveAll(); render(); }
+
+function render(){
+  var sc = SCENES[R.scene];
+  if(!sc){ showTitle(); return; }
+  var wasRead = !!M.read[R.scene];
+  if(sc.onEnter) sc.onEnter();
+  var text = (typeof sc.text === "function") ? sc.text() : sc.text;
+  imgEl.textContent = sc.img || "🥐";
+  var html = "";
+  if(sc.badge) html += '<span class="ending-badge' + (sc.horror ? " horror" : "") + '">' + esc(sc.badge) + '</span>';
+  if(sc.title) html += '<h2 class="ending-title">' + esc(sc.title) + '</h2>';
+  html += '<div class="scene-text">' + esc(text) + '</div>';
+  contentEl.innerHTML = html;
   cardEl.classList.remove("fade"); void cardEl.offsetWidth; cardEl.classList.add("fade");
-  contentEl.innerHTML = "";
   choicesEl.innerHTML = "";
-
-  if(scene.ending){
-    const badge = document.createElement("span");
-    badge.className = "ending-badge" + (scene.horror ? " horror" : "");
-    badge.textContent = scene.badge || "エンディング";
-    const h = document.createElement("h2");
-    h.className = "ending-title";
-    h.textContent = (typeof scene.title === "function") ? scene.title(S) : scene.title;
-    const p = document.createElement("div");
-    p.className = "scene-text";
-    p.textContent = (typeof scene.text === "function") ? scene.text(S) : scene.text;
-    contentEl.appendChild(badge);
-    contentEl.appendChild(h);
-    contentEl.appendChild(p);
-
-    const btn = document.createElement("button");
-    btn.className = "restart";
-    btn.textContent = "最初から遊ぶ";
-    btn.onclick = ()=>{ S = newState(); render("prologue"); window.scrollTo({top:0, behavior:"smooth"}); };
-    choicesEl.appendChild(btn);
-    return;
+  setStatusVisible(true);
+  refreshStatus();
+  var list = (sc.choices || []).filter(function(c){ return !c.if || c.if(); });
+  choicesEl.classList.toggle("single", list.length === 1);
+  list.forEach(function(c){
+    var b = document.createElement("button");
+    b.type = "button";
+    if(list.length === 1){
+      b.className = "continue";
+      b.textContent = "つづける";
+      b.setAttribute("aria-label", "つづける");
+    } else {
+      b.className = "choice";
+      b.innerHTML = '<span class="arrow">▸</span>' + esc(c.t);
+    }
+    b.addEventListener("click", function(){
+      clearTimers();
+      if(c.do) c.do();
+      var to = (typeof c.to === "function") ? c.to() : c.to;
+      if(to) go(to); else saveAll();
+    });
+    choicesEl.appendChild(b);
+  });
+  M.read[R.scene] = true; saveAll();
+  /* 見えない制限時間（最終局面専用）：時間切れで自動的に進む */
+  if(sc.timeout && !R.reread){
+    var tkT = navToken; var destT = sc.timeout.to; var msecT = sc.timeout.sec * 1000; var curT = R.scene;
+    setTimeout(function(){ if(tkT===navToken && R.scene===curT) go(destT); }, msecT);
   }
+  /* 既読スキップ：既読の単一選択シーンだけを自動で送る（選択肢の前では必ず止まる） */
+  if(M.skip && wasRead && list.length === 1){
+    var btn = choicesEl.querySelector("button");
+    if(btn){
+      var tk = navToken;
+      skipTimer = setTimeout(function(){ if(tk===navToken && btn.isConnected) btn.click(); }, 650);
+    }
+  }
+}
 
-  const p = document.createElement("div");
-  p.className = "scene-text";
-  p.textContent = (typeof scene.text === "function") ? scene.text(S) : scene.text;
-  contentEl.appendChild(p);
-
-  (scene.choices || []).forEach(ch=>{
-    if(ch.if && !ch.if(S)) return;
-    const btn = document.createElement("button");
-    btn.className = "choice";
-    const arrow = document.createElement("span");
-    arrow.className = "arrow"; arrow.textContent = "▶";
-    btn.appendChild(arrow);
-    btn.appendChild(document.createTextNode(ch.label));
-    btn.onclick = ()=>{ applyFx(ch.fx); render(ch.next); window.scrollTo({top:0, behavior:"smooth"}); };
-    choicesEl.appendChild(btn);
+/* ============ タイトル / 設定 / オーバーレイ ============ */
+function titleNoteText(){
+  if(M.finalArmed) return "―― 店の明かりが、いつもより遠くに灯っていた。";
+  if(M.loops<=0) return "";
+  if(M.loops===1) return "―― 窓のそばの席に、誰かのコップが残っている。";
+  return "―― 窓のそばの席が、ひとつ増えている気がする。";
+}
+function showTitle(){
+  clearTimers();
+  R.scene = ""; saveAll();
+  setStatusVisible(false);
+  document.body.classList.remove("late");
+  imgEl.textContent = "🌙";
+  document.getElementById("titlenote").textContent = titleNoteText();
+  var hasName = !!M.name;
+  var html = '<div class="scene-text">';
+  html += "午前0時。森の奥にだけ、明かりが灯る店がある。\n";
+  html += "お金はいらないと言われる、パン屋。\n\n";
+  if(M.loops>0){
+    html += "この明かりは、初めて見るはずだった。\n";
+    html += "……はずなのに、パンの匂いだけは、懐かしかった。";
+  } else {
+    html += "扉の向こうでは、焼きたての匂いがした。";
+  }
+  html += '</div>';
+  if(!hasName){
+    html += '<label style="font-size:14px;color:var(--ink2)">あなたの名前</label>';
+    html += '<input class="namein" id="nameInput" type="text" maxlength="12" placeholder="名前を入力してください" autocomplete="off">';
+  } else {
+    html += '<div class="scene-text" style="min-height:0;font-size:15px">名前：' + esc(M.name) + '</div>';
+  }
+  contentEl.innerHTML = html;
+  cardEl.classList.remove("fade"); void cardEl.offsetWidth; cardEl.classList.add("fade");
+  choicesEl.innerHTML = "";
+  function addBtn(label, fn, cls){
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "choice" + (cls ? " " + cls : "");
+    b.innerHTML = '<span class="arrow">▸</span>' + esc(label);
+    b.addEventListener("click", fn);
+    choicesEl.appendChild(b);
+  }
+  if(savedRunExists()){
+    addBtn("つづきから（" + PHASES[Math.min(R.phase,5)] + "）", function(){ go(R.scene); });
+    addBtn("はじめから（この夜をやり直す）", function(){ startFreshRun(); });
+  } else {
+    addBtn(M.loops>0 ? "新しい夜をはじめる" : "物語をはじめる", function(){
+      if(!M.name){
+        var v = document.getElementById("nameInput").value.trim();
+        if(!v){ alert("名前を入力してください。"); return; }
+        M.name = v; saveAll();
+      }
+      chooseReason();
+    });
+  }
+  addBtn("これまでの結末", function(){ openCollection(); });
+  addBtn("手帳を見る", function(){ openNotebook(); });
+  toolbarEl.style.display = "flex";
+}
+function savedRunExists(){
+  return !!(R.scene && SCENES[R.scene]);
+}
+function startFreshRun(){
+  R = newRun(); saveAll();
+  if(!M.reason){ chooseReason(); } else { go("pro_lost"); }
+}
+function chooseReason(){
+  setStatusVisible(false);
+  imgEl.textContent = "🧭";
+  contentEl.innerHTML = '<div class="scene-text">目を閉じると、帰る場所のことが浮かんだ。\n\n夜が明ける前に、どうしても帰らなければいけない。\nその理由は――</div>';
+  choicesEl.innerHTML = "";
+  var reasons = [
+    {id:"family", t:"家で、家族が待っている"},
+    {id:"promise", t:"明日の朝、大切な約束がある"},
+    {id:"cat", t:"飼い猫に、朝ごはんをあげていない"}
+  ];
+  reasons.forEach(function(r){
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "choice";
+    b.innerHTML = '<span class="arrow">▸</span>' + esc(r.t);
+    b.addEventListener("click", function(){
+      M.reason = r.id; R = newRun(); saveAll();
+      go("pro_lost");
+    });
+    choicesEl.appendChild(b);
   });
 }
+function reasonText(){
+  if(M.reason==="family") return "家では、家族が待っているはずだった。";
+  if(M.reason==="promise") return "明日の朝、大切な約束があった。";
+  if(M.reason==="cat") return "飼い猫の朝ごはんを、まだあげていない。";
+  return "帰らなければいけない理由があった。";
+}
+function openNotebook(){
+  var html = "<h2>手帳</h2>";
+  html += '<div style="font-size:13px;color:var(--muted);margin-bottom:6px">店で見聞きしたことが、そのまま書き留めてある。</div>';
+  if(!M.notes.length) html += '<div class="empty">まだ何も書かれていない。</div>';
+  M.notes.forEach(function(n){ html += '<div class="entry">' + esc(n.text) + '</div>'; });
+  html += '<div style="margin-top:14px"><button class="tool" onclick="closeOverlay()">閉じる</button> ';
+  html += '<button class="tool" onclick="renamePrompt()">名前を変更する</button></div>';
+  sheetEl.innerHTML = html;
+  overlayEl.classList.add("open");
+}
+function renamePrompt(){
+  var v = prompt("名前を変更します", M.name || "");
+  if(v && v.trim()){ M.name = v.trim(); saveAll(); }
+  openNotebook();
+}
+var ENDING_DEFS = [
+  {id:"tadaima", title:"ただいま", epi:"epi_td_1"},
+  {id:"kuzu", title:"パンくずの先", epi:"epi_kz_1"},
+  {id:"seki", title:"お客さんの席", epi:"epi_sk_1"},
+  {id:"ohayo", title:"おはよう", epi:"epi_as_1"},
+  {id:"irasshai", title:"いらっしゃい", epi:"epi_ir_1"},
+  {id:"nameless", title:"名前のない客", epi:"epi_nm_1"},
+  {id:"memo", title:"メモの書き手", epi:"epi_mm_1"},
+  {id:"nochoice", title:"選べない", epi:"epi_nc_1"},
+  {id:"owner", title:"新しい店主", epi:"epi_ow_1"},
+  {id:"shopmorning", title:"店主の朝", epi:"epi_tm_1"},
+  {id:"trueend", title:"朝の食卓", epi:"epi_tr_1"}
+];
+function openCollection(){
+  var html = "<h2>これまでの結末</h2>";
+  var any = false;
+  ENDING_DEFS.forEach(function(e){
+    var got = !!M.endings[e.id];
+    if(got) any = true;
+    html += '<div class="coll-item"><div><div class="t">' + (got ? "「" + esc(e.title) + "」" : "？？？") + '</div><div class="s">' + (got ? "読み返せる" : "まだ辿り着いていない") + '</div></div>';
+    if(got) html += '<button class="tool" onclick="rereadEpi(\'' + e.epi + '\')">後日談を読み返す</button>';
+    html += '</div>';
+  });
+  if(!any) html += '<div class="empty">まだ、どの結末にも辿り着いていない。</div>';
+  html += '<div style="margin-top:14px"><button class="tool" onclick="closeOverlay()">閉じる</button></div>';
+  sheetEl.innerHTML = html;
+  overlayEl.classList.add("open");
+}
+function rereadEpi(epiId){
+  closeOverlay();
+  R = newRun(); R.reread = true; R.scene = epiId; saveAll();
+  render();
+}
+function closeOverlay(){ overlayEl.classList.remove("open"); }
+overlayEl.addEventListener("click", function(e){ if(e.target===overlayEl) closeOverlay(); });
+document.getElementById("btnNotebook").addEventListener("click", openNotebook);
+document.getElementById("btnColl").addEventListener("click", openCollection);
+skipBtn.addEventListener("click", function(){
+  M.skip = !M.skip; saveAll();
+  skipBtn.textContent = "既読スキップ：" + (M.skip ? "入" : "切");
+  skipBtn.classList.toggle("on", M.skip);
+});
+skipBtn.textContent = "既読スキップ：" + (M.skip ? "入" : "切");
+skipBtn.classList.toggle("on", M.skip);
 
-S = newState();
-render("prologue");
+/* 見送りの言葉（覗いた場合だけ、少し違う） */
+function farewellText(){
+  var t = "「ありがとうございました」\n\n";
+  t += "店主は、ドアのところまで見送った。\n";
+  t += "「……気をつけて」\n";
+  if(R.peeked){
+    t += "\n「お忘れ物は、ないですか」\n";
+    t += "私は、ない、と答えた。";
+  }
+  return t;
+}
+
+/* ================================================================
+   シーン定義
+   ================================================================ */
+var SCENES = {
+
+/* ---------- プロローグ ---------- */
+pro_lost: {
+  img:"🌲",
+  onEnter:function(){ if(M.finalArmed){ R.final = true; M.finalArmed = false; saveAll(); } },
+  text:function(){
+    var t = "森の中で、目が覚めた。\n\n";
+    t += reasonText() + "\n";
+    if(R.final) t += "森の匂いが、懐かしかった。理由は、分からなかった。\n";
+    t += "どうやってここへ来たのか、思い出せなかった。振り返っても、木と闇が続いているだけだった。\n";
+    t += "スマホは圏外。時計だけが、午前0時を少し過ぎていた。\n\n";
+    if(isRain()) t += "雨だった。葉の音は、水に沈んで聞こえなかった。\n";
+    else t += "歩くたび、足元の落ち葉が乾いた音を立てた。\n";
+    t += "その音が、時々、一歩だけ遅れて返ってきた。";
+    return t;
+  },
+  choices:[
+    {t:"ポケットの中身を確かめる", to:"pro_pocket", if:function(){ return M.bringUnlocked && loopN()>=2; }},
+    {t:"歩き続ける", to:"pro_dog"}
+  ]
+},
+pro_dog: {
+  img:"🐕",
+  text:function(){
+    var t = "開けた場所で、白い犬が待っていた。\n\n";
+    t += "逃げも吠えもせず、こちらを見ていた。短く一度だけ、尻尾が振れた。\n";
+    if(R.bring==="onigiri"){
+      t += "犬は、私の鞄の方へ鼻を寄せて、何度も匂いを嗅いだ。\n";
+    }
+    if(M.loops===2){
+      t += "首輪には小さな名札が付いていて、「くろ」と読めた。\n";
+      t += "白い犬だった。\n\n";
+      t += "呼ぶと、犬は森の奥へ歩き出した。離れすぎない速さで、時々こちらを振り返った。";
+      addNote("dog_tag2","白い犬の名札に「くろ」と書いてあった。");
+    } else if(loopN()>=2){
+      t += "首輪はあるのに、名札がなかった。前は付いていた気がする。\n";
+      t += "いつ見たのかは、思い出せなかった。\n";
+      t += "犬は店のある方を向き、待っていた。";
+      addNote("dog_tag","白い犬の首輪に、名札がなかった。前は付いていた気がする。");
+    } else {
+      t += "首輪には小さな名札が付いていて、ひらがなで「しろ」と読めた。\n";
+      t += "呼ぶと、犬は森の奥へ歩き出した。離れすぎない速さで、時々こちらを振り返った。";
+    }
+    return t;
+  },
+  choices:[
+    {t:"犬の写真を撮る", to:"photo_dog", if:function(){ return !hasPhoto("dog"); }},
+    {t:"犬についていく", to:"pro_shop"}
+  ]
+},
+pro_shop: {
+  img:"🏮",
+  text: "木々の向こうに、温かい明かりが見えた。\n\n小さな店だった。窓には湯気。ドアの上には木の看板があり、\n『パン屋』とだけ書いてある。\n\n午前0時を過ぎた森の奥で、焼きたてのパンの匂いがした。\n白い犬は店の前で座り、それ以上は近づかなかった。",
+  choices:[ {t:"店のドアを開ける", to:"arrival"} ]
+},
+arrival: {
+  img:"🔔",
+  onEnter:function(){ R.phase = 0; },
+  text:function(){
+    var t = "ベルが鳴って、店主が顔を上げた。\n\n";
+    var initial = M.name ? M.name.charAt(0) : "";
+    if(loopN()>=2 && initial){
+      t += "「" + initial + "……」\n\n";
+      t += "言いかけて、店主は小さく首を振った。\n";
+      t += "「いらっしゃいませ」\n\n";
+      t += "何の言いかけだったのかは、分からなかった。\n";
+      t += "ただ、その一音が、しばらく耳に残った。";
+      addNote("slip_name","店主が「" + initial + "」と言いかけて、やめた。");
+    } else {
+      t += "「いらっしゃいませ。……お久しぶりです」\n\n";
+      t += "店主は、小さく言い直した。\n";
+      t += "「いえ。はじめまして、でしたね」\n\n";
+      t += "言い直したあとの笑顔だけが、ほんの少し遅れて浮かんだ。";
+      addNote("slip_first","店主は私に「お久しぶりです」と言って、言い直した。");
+    }
+    return t;
+  },
+  choices:[ {t:"席へ案内される", to:"arrival_seat"} ]
+},
+arrival_seat: {
+  img:"🪑",
+  text:function(){
+    var t = "「どうぞ、こちらの席へ」\n\n";
+    if(loopN()>=2){
+      t += "案内されたのは、窓に一番近い席だった。\n";
+      t += "「いつもの――」\n\n";
+      t += "店主は、言い直した。\n";
+      t += "「窓に一番近い席です。どうぞ」\n\n";
+      t += "テーブルには、もう湯気の立つコップが置かれていた。\n";
+      t += "私が来る前から、用意されていたみたいに。";
+      addNote("slip_seat","店主は「いつもの」と言いかけて、言い直した。コップは、座る前から置かれていた。");
+    } else {
+      t += "窓に近い席に案内された。店内は狭く、カウンターの前に小さな席がいくつかあるだけだった。\n";
+      t += "焼きたての匂いに、古い木と、かすかな煙の匂いが混ざっていた。\n\n";
+      t += "客は二人いた。カウンター近くで店主と話している人と、窓の外ばかり見ている人。\n";
+      t += "二人とも、私が入ってきた時、一度だけこちらを見た。";
+    }
+    return t;
+  },
+  choices:[ {t:"席に着く", to:"taste"} ]
+},
+
+/* ---------- 試食と対価、帰り道を聞く ---------- */
+taste: {
+  img:"🍞",
+  text:function(){
+    var t = "店主が、小さな一切れを差し出した。\n\n「この店では、お金はいただきません。その代わりに、その時々で、お代をいただいています」\n\n「どうぞ、一切れ。丸いパンです。焼きたてですよ」\n\n";
+    if(R.final){
+      t += "なぜか、今夜は手が伸びなかった。\nこの店の物を口にすることが、何かの始まりのような気がした。";
+      return t;
+    }
+    t += "お代が何なのかは分からないまま、受け取ってしまった。\n温かくて、柔らかくて、ほんの少し甘い。\n\n食べ終えると、店主はもうカウンターへ戻っていた。\n\n……私のお代は、何だったんだろう。";
+    return t;
+  },
+  choices:[
+    {t:"受け取って、食べる", to:"price", if:function(){ return R.final; }, do:function(){ R.tasted = true; R.finalBroken = true; }},
+    {t:"丁寧に断る", to:"price", if:function(){ return R.final; }},
+    {t:"代金を聞く", to:"price", if:function(){ return !R.final; }, do:function(){ R.tasted = true; }}
+  ]
+},
+price: {
+  img:"🧾",
+  text:function(){
+    if(R.final && !R.tasted){
+      return "「あの、私は、まだ何も受け取っていません」\n\n店主は、静かに私を見た。\n\n「……ええ。そうですね」\n\nそれだけだった。\n\n冊子は、開かれなかった。";
+    }
+    var t = "声をかけると、店主はカウンターの向こうから顔を上げた。\n\n";
+    t += "「あの、お代は――」\n\n";
+    t += "店主は首を少し傾けて、穏やかに言った。\n\n";
+    t += "「お代は、もういただいています」\n\n";
+    t += "……まだ、何も渡していない。\n";
+    t += "何か申し出ようとしたけれど、言葉にならなかった。\n\n";
+    t += "店主はカウンターの端の冊子を引き寄せると、ペンで何か書き込んだ。短い字だった。一行か、二行か。\n\n";
+    t += "思わず、聞いていた。\n";
+    t += "「あの……今の、私のことですか」\n\n";
+    t += "店主は穏やかに笑った。\n";
+    t += "「大丈夫ですよ。ちゃんと、書いておきましたから」\n\n";
+    t += "何を、とは聞けなかった。\n";
+    t += "店主はもう、棚のパンを並べ直していた。";
+    addNote("price_line","一切れのお代を聞いたら「もういただいています」と言われた。まだ何も渡していない。");
+    addNote("ledger_ask","冊子に何を書いたか聞くと、「ちゃんと、書いておきました」とだけ言った。");
+    return t;
+  },
+  choices:[ {t:"店主に、帰り道のことを聞く", to:"ask_way"} ]
+},
+ask_way: {
+  img:"🧭",
+  onEnter:function(){ R.askedWay = true; },
+  text: "「すみません。帰り道のことで、聞きたいんですけど」\n\n「私、気づいたら森の中にいて。町へ帰るには、どう歩けばいいですか」\n\n店主は、少し考えるように目を伏せた。\n\n「夜の森は、道が変わります。今出ても、同じ所へ戻ってしまいますよ」\n\n「……夜明けが近づけば、森も少し、落ち着きます。その頃なら」\n\nそれ以上は、言わなかった。\n聞き方は、変えた方がよさそうだった。",
+  choices:[ {t:"席に戻る", to:"hub1"} ]
+},
+
+/* ---------- 棚と購入 ---------- */
+shelf: {
+  img:"🥖",
+  text:function(){
+    var t = "棚には、七種類のパンが並んでいた。\n\n丸いパンを見ると、店主が「焼きたてです」と言った。\n音のしないパンには、「静かに食べられますよ」。\n昨日のパンには、「昨日、焼いたものです」。\n分け合うパンには、「誰かと分けるためのパンです」。\n匂いのないパンには、「匂いは、ありません」。\n重さの変わるパンには、「重さは、その時々です」。\n黒いパンに視線が移ると、店主は何も言わなかった。\n\n「お代は、その時々で。今日のあなたには――」\n店主は言葉を選ぶように、少し間を置いた。";
+    if(isRain()) t += "\n\n窓の外では、雨の音がしていた。";
+    return t;
+  },
+  choices:[
+    {t:"丸いパンを買う", to:"buy_marui", if:function(){ return !R.boughtBread; }},
+    {t:"音のしないパンを買う", to:"buy_oto", if:function(){ return !R.boughtBread; }},
+    {t:"昨日のパンを買う", to:"buy_kinou", if:function(){ return !R.boughtBread; }},
+    {t:"分け合うパンを買う", to:"buy_wake", if:function(){ return !R.boughtBread; }},
+    {t:"匂いのないパンを買う", to:"buy_nioi", if:function(){ return !R.boughtBread; }},
+    {t:"重さの変わるパンを買う", to:"buy_omosa", if:function(){ return !R.boughtBread; }},
+    {t:"黒いパンについて聞く", to:"buy_kuro", if:function(){ return !R.heardKuro; }},
+    {t:"黒いパンを買う", to:"buy_kuro_buy", if:function(){ return R.heardKuro && loopN()>=3 && !R.kuroBought; }},
+    {t:"買わずに客席へ戻る", to:"hub1", if:function(){ return !R.boughtBread; }},
+    {t:"客席へ戻る", to:"hub1", if:function(){ return !!R.boughtBread; }}
+  ]
+},
+buy_marui: {
+  img:"🍞",
+  text: "「丸いパンですね。お代は――」\n店主は、カウンターの端の小さな花を見た。\n「その花を、生け直していただけますか」\n\n花は、特に乱れていなかった。",
+  choices:[
+    {t:"花を生け直す", to:"buy_marui_done", do:function(){ if(R.final) R.finalBroken = true; R.boughtBread="marui"; R.paidPrice="花を生け直す"; giveBread("marui"); }}
+  ]
+},
+buy_marui_done: {
+  img:"💐",
+  text: "花を生け直した。水を替えて、茎の向きを整えた。\n\n店主が、カウンター越しに覗き込んだ。\n\n「ありがとうございます。……きれいに、生けますね」\n\n「前のお客様も、よく生けてくださったんですよ」\n\nパンは、紙に包んで渡された。",
+  choices:[ {t:"席に戻る", to:"hub1"} ]
+},
+buy_oto: {
+  img:"🍞",
+  text: "「音のしないパンですね。お代は――」\n店主は、ドアのベルを指さした。\n「あのベルの音を、覚えておいてください」\n\nそれだけだった。\n\n入ってきた時の、ベルの音。思い出すと、店主が小さく頷いた。\n\n「……ええ、その音です」\n\nパンは、紙に包んで渡された。",
+  choices:[
+    {t:"席に戻る", to:"hub1", do:function(){ if(R.final) R.finalBroken = true; R.boughtBread="oto"; R.paidPrice="ベルの音を覚える"; giveBread("oto"); addNote("bell","ベルの音を覚えることが、音のしないパンのお代だった。"); }}
+  ]
+},
+buy_wake: {
+  img:"🍞",
+  text: "「分け合うパンですね。お代は――」\n店主は、少しだけ考える顔をした。\n「半分は、誰かにあげてください。誰でも、いいです」\n\n「……分ける相手が、いない時は？」\n\n「その時は、その時です」\n\n半分あげる約束で、パンが私のものになった。",
+  choices:[
+    {t:"約束して、受け取る", to:"hub1", do:function(){ if(R.final) R.finalBroken = true; R.boughtBread="wake"; R.paidPrice="半分を誰かにあげる約束"; giveBread("wake"); }}
+  ]
+},
+buy_kuro: {
+  img:"⬛",
+  onEnter:function(){ R.heardKuro = true; },
+  text: "「あのパンは……」と尋ねると、店主が顔を上げた。\n\n「それは、売り物ではありません」\n\n穏やかな声だった。けれど、その時だけ、カウンターを拭く手が止まっていた。\n\n「食べないでくださいね」\n\nパンは棚に残った。黒くて、つやがあって、焼きたての匂いだけがした。",
+  choices:[ {t:"棚から離れる", to:"shelf"} ]
+},
+
+/* ---------- 客席ハブ ---------- */
+hub1: {
+  img:"🕯️",
+  onEnter:function(){ R.phase = Math.max(R.phase, 1); },
+  text:function(){
+    var t = "店内は静かだった。窯の火の音と、時々、誰かのカップの音。\n\n";
+    if(R.paidPrice==="花を生け直す") t += "指先には、花の茎の青い匂いが残っていた。\n";
+    if(R.paidPrice==="ベルの音を覚える") t += "ドアのベルの音が、まだ耳の奥に残っていた。\n";
+    if(R.paidPrice==="半分を誰かにあげる約束") t += "分け合うパンの重さが、膝の上で落ち着かなかった。\n";
+    if(!R.metTalkRun) t += "カウンター近くの客と、目が合った。向こうから、笑いかけてきた。\n";
+    if(loopN()>=2) t += "窓際とは反対の席で、二人連れが小声で話していた。子どもの客が、椅子の上で足を揺らしていた。\n";
+    if(loopN()>=3) t += "隅の席の客は、店の中でも窓の外でもない方を見ていた。\n";
+    if(loopN()>=4) t += "カウンターの内側に、店主のほかに、もう一人立っていた。\n";
+    if(loopN()>=4 && M.newGuestFate==="lied") t += "筆談の客の隣の席で、あの夜の客が、メモ帳を膝に置いて座っていた。\n";
+    if(loopN()>=4 && M.newGuestFate==="silent") t += "あの夜の客は、カウンター近くの席で、もう笑っていた。初めての夜の顔では、なかった。\n";
+    if(loopN()>=4 && M.newGuestFate==="lied") addNote("newguest_lied","あの夜、嘘をついた客は、メモ帳を持つようになっていた。");
+    if(loopN()>=4 && M.newGuestFate==="silent") addNote("newguest_silent","あの夜の客は、もう初めての顔をしていなかった。");
+    if(loopN()>=4 && M.newGuestFate==="warned") addNote("newguest_gone","あの夜、忠告した客は、もう店にいなかった。");
+    t += "外は暗く、この店に夜明けまでいていいのかどうかも分からなかった。";
+    return t;
+  },
+  choices:[
+    {t:"カウンター近くの客の声に、答える", to:"ask_talk_intro", if:function(){ return !R.metTalkRun; }},
+    {t:"常連客と、話をする", to:"ask_talk", if:function(){ return R.metTalkRun && !(R.talkShop && R.talkPrice && R.talkWay); }},
+    {t:"カウンターへ行って、店主に聞く", to:"ask_shop", if:function(){ return !(R.shopPrice2 && R.shopGuests && R.shopStay); }},
+    {t:"窓際の客に、帰り道のことを聞く", to:"ask_quiet", if:function(){ return !(R.quietWay && R.quietPrice && R.quietVoice); }},
+    {t:"窓際の客に、パンの半分を渡す", to:"share_quiet", if:function(){ return hasBread("wake") && !R.sharedWake; }},
+    {t:"常連客に、パンの半分を渡す", to:"share_talk", if:function(){ return hasBread("wake") && !R.sharedWake && R.metTalkRun; }},
+    {t:"店主に、パンの半分を渡す", to:"share_shop", if:function(){ return hasBread("wake") && !R.sharedWake; }},
+    {t:"店の外を見に行く", to:"out_gate", if:function(){ return R.quietWay; }},
+    {t:"それでも、外を見に行く", to:"out_gate", if:function(){ return !R.quietWay && R.talkWay && R.shopStay; }},
+    {t:"席で、夜明けを待つ", to:"wait_stay", if:function(){ return !R.final && (R.talkWay || R.shopStay || R.quietWay); }},
+    {t:"棚のパンを、見に行く", to:"shelf", if:function(){ return !R.boughtBread && (R.metTalkRun || R.quietWay || R.quietPrice || R.quietVoice || R.shopPrice2 || R.shopGuests || R.shopStay); }},
+    {t:"子どもの客に、声をかける", to:"ask_child", if:function(){ return loopN()>=2 && !R.metChild; }},
+    {t:"二人連れの客に、声をかける", to:"ask_pair", if:function(){ return loopN()>=2 && !R.metPair; }},
+    {t:"隅の席の客に、声をかける", to:"ask_name", if:function(){ return loopN()>=3 && !R.metName; }},
+    {t:"カウンターの内側の人に、声をかける", to:"ask_former", if:function(){ return loopN()>=4 && !R.metFormer; }},
+    {t:"ドアのそばで戸惑っている客に、声をかける", to:"ask_new", if:function(){ return loopN()>=3 && !R.metNew && !M.newGuestFate; }},
+    {t:"あの夜の客の様子を見る", to:"ask_new2", if:function(){ return loopN()>=4 && !!M.newGuestFate && !R.metNew; }},
+    {t:"店内の写真を撮る", to:"photo_shop", if:function(){ return loopN()>=2 && !hasPhoto("shop"); }},
+    {t:"スマホの写真を見返す", to:"photo_view", if:function(){ return loopN()>=2 && M.photos.length>=2; }},
+    {t:"店主に、持ってきたものを渡す", to:"give_food_hub", if:function(){ return (R.bring==="onigiri" || R.bring==="tea") && !R.bringEaten && !R.bringShared; }},
+    {t:"おにぎりを食べる", to:"eat_bring", if:function(){ return R.bring==="onigiri" && !R.bringEaten && !R.bringShared && R.hunger>=2; }}
+  ]
+},
+
+/* ---------- 聞き込み：店主 ---------- */
+ask_shop: {
+  img:"🔔",
+  text: "カウンターへ行った。\n\n店主は、向こう側で静かに立っていた。\n\n「何か、ご用ですか」",
+  choices:[
+    {t:"自分のお代のことを、もう一度聞く", to:"ask_shop_price2", if:function(){ return !R.shopPrice2; }},
+    {t:"他のお客さんのことを聞く", to:"ask_shop_guests", if:function(){ return !R.shopGuests; }},
+    {t:"夜明けまでいてもいいか聞く", to:"ask_shop_stay", if:function(){ return !R.shopStay; }},
+    {t:"この店の、持ち主のことを聞く", to:"buyback_talk", if:function(){ return M.truthSelf && M.slips>=3; }, do:function(){ R.buybackFrom = "shop"; }},
+    {t:"席に戻る", to:"hub1"}
+  ]
+},
+ask_shop_price2: {
+  img:"🔔",
+  onEnter:function(){ R.shopPrice2 = true; },
+  text:function(){
+    if(M.loops>=1){
+      addNote("shop_slip_price","店主「お代は、いつも、そうなんですよ」");
+      M.slips = Math.max(M.slips, 2);
+      return "「あの、私のお代は、結局、何だったんですか」\n\n「もう、いただいていますから」\n\n店主は、少し笑った。\n\n「いつも、そうなんですよ」\n\n……いつも？";
+    }
+    return "「あの、私のお代は、結局、何だったんですか」\n\n店主は、少し笑った。\n\n「もう、いただいていますから。大丈夫ですよ」\n\nそれ以上は、言わなかった。";
+  },
+  choices:[ {t:"話を続ける", to:"ask_shop"} ]
+},
+ask_shop_guests: {
+  img:"🔔",
+  onEnter:function(){ R.shopGuests = true; },
+  text:function(){
+    if(M.loops>=1){
+      addNote("shop_slip_guests","店主が「あなたも、もう何度も」と言いかけて、やめた。");
+      M.slips = Math.max(M.slips, 3);
+      return "「他のお客さんは、皆、帰れたんですか」\n\n「さあ」\n\n店主は、カウンターを拭く手を止めなかった。\n\n「お客様の帰りは、それぞれですから」\n\n「……あなたも、もう何度も」\n\n言いかけて、店主は小さく首を振った。\n\n「いえ。何でもありません」";
+    }
+    return "「他のお客さんは、皆、帰れたんですか」\n\n「さあ」\n\n店主は、カウンターを拭く手を止めなかった。\n\n「お客様の帰りは、それぞれですから」";
+  },
+  choices:[ {t:"話を続ける", to:"ask_shop"} ]
+},
+ask_shop_stay: {
+  img:"🔔",
+  onEnter:function(){ R.shopStay = true; },
+  text:function(){
+    if(M.loops>=1){
+      addNote("shop_slip_stay","店主が「いつもの席」と言いかけて、言い直した。");
+      M.slips = Math.max(M.slips, 4);
+      return "「夜明けまで、ここにいてもいいんですか」\n\n「ええ、どうぞ」\n\n「席は、空いていますよ」\n\n「……いつもの席が」\n\n店主は、言い直した。\n\n「いえ。どの席でも、どうぞ」";
+    }
+    return "「夜明けまで、ここにいてもいいんですか」\n\n「ええ、どうぞ」\n\n「席は、空いていますよ」\n\n穏やかな声だった。";
+  },
+  choices:[ {t:"話を続ける", to:"ask_shop"} ]
+},
+
+/* ---------- 聞き込み：よく喋る常連客 ---------- */
+ask_talk_intro: {
+  img:"🙂",
+  onEnter:function(){ M.metTalk = true; R.metTalkRun = true; },
+  text: "「やあ、初めての顔だね」\n\nカウンター近くの客だった。私が近づかなくても、向こうから声が届いた。\n\n「ぼくは、ここの常連。分からないことがあったら、聞いてよ」\n\n隣の椅子を、手で軽く叩いた。",
+  choices:[ {t:"隣に座る", to:"ask_talk"} ]
+},
+ask_talk: {
+  img:"🙂",
+  text: "「何が聞きたい？」\n\n常連客は、笑って待っていた。",
+  choices:[
+    {t:"この店のことを聞く", to:"ask_talk_shop", if:function(){ return !R.talkShop; }},
+    {t:"お代のことを聞く", to:"ask_talk_price", if:function(){ return !R.talkPrice; }},
+    {t:"帰り道のことを聞く", to:"ask_talk_way", if:function(){ return !R.talkWay; }},
+    {t:"席に戻る", to:"hub1"}
+  ]
+},
+ask_talk_shop: {
+  img:"🙂",
+  onEnter:function(){ R.talkShop = true; },
+  text: "「この店？　午前0時に開いて、夜明け前に閉まる。それだけだよ」\n\n「店主さんは、ずっとあのまんま。ぼくが来始めた頃から、変わらないと思う」\n\nいつ来始めたのか聞くと、常連客は少し笑って、コップの中を見た。\n\n「……いつだっけ。まあ、長いよ」\n\nコップの中身は、減っていないように見えた。",
+  choices:[ {t:"話を続ける", to:"ask_talk"} ]
+},
+ask_talk_price: {
+  img:"🙂",
+  onEnter:function(){ R.talkPrice = true; },
+  text:function(){
+    if(!R.quietPrice && R.shopPrice2){
+      return "「私のお代、店主さんに聞いても、『もういただいています』の一点張りで」\n\n「はは、あの人、いつもああだよ」\n\n「お代は、お金じゃなくて、小さな用事とか、約束とか。その時々で、店主さんが決めるんだ」\n\n「ぼくなんか、だいたいいつも、店の窓を拭いてる」\n\n笑いながら言った。";
+    }
+    if(R.quietPrice){
+      return "「値段は、二つあるって聞いたんですけど」\n\n「二つ？」\n\n常連客は、少し笑って、窓の方を見た。\n\n「あの人は、大げさなんだよ。難しく考えすぎ」\n\n「お代は、お金じゃなくて、小さな用事とか、約束とか。その時々で、店主さんが決めるんだ」\n\n「ぼくなんか、だいたいいつも、店の窓を拭いてる」\n\n笑いながら言った。";
+    }
+    return "「お代？　お金は取らないよ、この店は」\n\n「小さな用事とか、約束とか。……その時々で、店主さんが決めるんだ」\n\n「ぼくなんか、だいたいいつも、店の窓を拭いてる」\n\n笑いながら言った。";
+  },
+  choices:[ {t:"話を続ける", to:"ask_talk"} ]
+},
+ask_talk_way: {
+  img:"🙂",
+  text:function(){
+    R.talkWay = true;
+    var t;
+    if(R.quietWay){
+      t = "「窓際の人は、店で待っても朝は来なかったって、言ってたんですけど」\n\n";
+      t += "「……ああ、あの人ね」\n\n";
+      t += "常連客は、窓の方を見て、すぐに目を戻した。\n\n";
+      t += "「でも、無理に出なくていいんだ。ここで温かいものを食べて、夜明けを待てばいい。店にいれば、安全だから」";
+    } else if(R.shopStay){
+      t = "「店主さんは、夜明けまでここにいていいって、言ってたんですけど」\n\n";
+      t += "「そうそう」\n\n";
+      t += "「ここで温かいものを食べて、夜明けを待てばいいんだ。店にいれば、安全だから」";
+    } else {
+      t = "「帰り道？　まっすぐ歩いても、着かないよ。森は夜、同じ景色を何度も見せるから」\n\n";
+      t += "「だから、無理に出なくていいんだ。ここで温かいものを食べて、夜明けを待てばいい。店にいれば、安全だから」";
+    }
+    addNote("talk_way","常連客「店にいれば、夜明けまで安全」");
+    return t;
+  },
+  choices:[ {t:"話を続ける", to:"ask_talk"} ]
+},
+
+share_talk: {
+  img:"🍞",
+  text: "分け合うパンを、半分に割った。自然に、二つに割れた。\n\n半分を、常連客の前に置いた。「よかったら」\n\n「お、いいの？　ありがとう」\n\n彼は、すぐに一口かじった。\n\n「……うん、ここのは、やっぱりうまいなあ」\n\n笑って言って、二口目も、すぐだった。",
+  choices:[
+    {t:"話を続ける", to:"ask_talk", do:function(){ R.sharedWake = true; R.wakeHalf = true; }},
+    {t:"席に戻る", to:"hub1", do:function(){ R.sharedWake = true; R.wakeHalf = true; }}
+  ]
+},
+
+share_shop: {
+  img:"🍞",
+  text: "分け合うパンを、半分に割った。自然に、二つに割れた。\n\n半分を持って、カウンターへ行った。「よかったら」\n\n店主は、一瞬だけ、手を止めた。\n\n「……ありがとうございます」\n\n受け取った半分は、食べられずに、カウンターの端の小さな皿に置かれた。冊子の、すぐそばだった。",
+  choices:[
+    {t:"席に戻る", to:"hub1", do:function(){ R.sharedWake = true; R.wakeHalf = true; }}
+  ]
+},
+
+/* ---------- 聞き込み：静かな客 ---------- */
+ask_quiet: {
+  img:"🤫",
+  onEnter:function(){ M.metQuiet = true; },
+  text:function(){
+    if(R.quietMetRun){
+      if(M.quietVoiceless) return "窓際の客は、メモ帳を開いて、こちらを見た。";
+      return "窓際の客は、こちらを見た。";
+    }
+    R.quietMetRun = true;
+    if(M.quietVoiceless){
+      return "窓際の客は、私に気づくと、胸のポケットから小さなメモ帳を取り出した。\n\n帰り道のことを聞きたくて、声をかけた。\n\n彼は、少し考えてから、『なにか』と書いて、こちらへ向けた。";
+    }
+    return "窓際の客は、相変わらず窓の外を見ていた。\n\n帰り道のことを聞きたくて、声をかけた。\n\n「……ああ」\n\n短い返事だった。でも、席を立つ様子はなかった。";
+  },
+  choices:[
+    {t:"お代のことを聞く", to:"ask_quiet_price", if:function(){ return !R.quietPrice; }},
+    {t:"帰り道のことを聞く", to:"ask_quiet_way", if:function(){ return !R.quietWay; }},
+    {t:"声のことを聞く", to:"ask_quiet_voice", if:function(){ return !R.quietVoice; }},
+    {t:"席に戻る", to:"hub1"}
+  ]
+},
+ask_quiet_price: {
+  img:"🤫",
+  text:function(){
+    R.quietPrice = true;
+    if(M.quietVoiceless){
+      var v;
+      if(R.talkPrice){
+        v = "「お代は、その時々で決まるって聞いたんですけど」\n\n";
+        v += "メモ帳に、ゆっくり書かれた。\n\n";
+        v += "『うん。それは、一つ目の値段』\n\n";
+        v += "もう一行。\n\n";
+        v += "『もう一つある。言われない値段。そっちは、払ったあとでしか分からない』\n\n";
+        v += "それ以上は、書かれなかった。書くのをやめた手が、自分の喉元に触れていた。";
+      } else if(R.shopPrice2){
+        v = "「私のお代、店主さんは『もういただいています』って言うんです」\n\n";
+        v += "メモ帳に、ゆっくり書かれた。\n\n";
+        v += "『そう、言うんだ』\n\n";
+        v += "『値段は二つある。一つは、言われる値段』\n\n";
+        v += "もう一行。\n\n";
+        v += "『もう一つは、言われない値段。そっちは、払ったあとでしか分からない』\n\n";
+        v += "それ以上は、書かれなかった。書くのをやめた手が、自分の喉元に触れていた。";
+      } else {
+        v = "メモ帳に、ゆっくり書かれた。\n\n";
+        v += "『値段は二つある。一つは、言われる値段』\n\n";
+        v += "もう一行。\n\n";
+        v += "『もう一つは、言われない値段。そっちは、払ったあとでしか分からない』\n\n";
+        v += "それ以上は、書かれなかった。書くのをやめた手が、自分の喉元に触れていた。";
+      }
+      addNote("quiet_price","静かな客「値段は二つある。言われない方は、払ったあとでしか分からない」");
+      return v;
+    }
+    var u;
+    if(R.talkPrice){
+      u = "「お代は、その時々で決まるって聞いたんですけど」\n\n";
+      u += "「……うん。それは、一つ目の値段だね」\n\n";
+      u += "静かな客は、初めてこちらを見た。\n\n";
+      u += "「もう一つは、言われない値段。そっちはね、払ったあとでしか分からないんだ」\n\n";
+      u += "何を払ったのかは、言わなかった。\n";
+      u += "少しだけ笑って、また窓の外を見た。";
+    } else if(R.shopPrice2){
+      u = "「私のお代、店主さんは『もういただいています』って言うんです」\n\n";
+      u += "「……そう、言うんだ」\n\n";
+      u += "静かな客は、初めてこちらを見た。\n\n";
+      u += "「値段は二つある。一つは、言われる値段」\n\n";
+      u += "「もう一つは、言われない値段。そっちはね、払ったあとでしか分からないんだ」\n\n";
+      u += "何を払ったのかは、言わなかった。\n";
+      u += "少しだけ笑って、また窓の外を見た。";
+    } else {
+      u = "「値段は二つある。一つは、言われる値段」\n\n";
+      u += "静かな客は、初めてこちらを見た。\n\n";
+      u += "「もう一つは、言われない値段。そっちはね、払ったあとでしか分からないんだ」\n\n";
+      u += "何を払ったのかは、言わなかった。\n";
+      u += "少しだけ笑って、また窓の外を見た。";
+    }
+    addNote("quiet_price","静かな客「値段は二つある。言われない方は、払ったあとでしか分からない」");
+    return u;
+  },
+  choices:[ {t:"話を続ける", to:"ask_quiet"} ]
+},
+ask_quiet_way: {
+  img:"🤫",
+  text:function(){
+    R.quietWay = true;
+    if(M.quietVoiceless){
+      var v;
+      if(R.talkWay){
+        v = "「カウンターの人は、店にいれば夜明けまで安全だって、言ってたんですけど」\n\n";
+        v += "メモ帳に、ゆっくり書かれた。\n\n";
+        v += "『あの人も、そう言うんだ』\n\n";
+        v += "『ぼくも、そう言われた。前に、待ったことがある』\n\n";
+        v += "『時計は進んだのに、外は明るくならなかった』\n\n";
+        v += "それ以上は、書かれなかった。";
+      } else if(R.shopStay){
+        v = "「店主さんは、夜明けまでいていいって、言ってたんですけど」\n\n";
+        v += "メモ帳に、ゆっくり書かれた。\n\n";
+        v += "『そう、言われたんだ』\n\n";
+        v += "『前に、ぼくも待った』\n\n";
+        v += "『時計は進んだのに、外は明るくならなかった』\n\n";
+        v += "それ以上は、書かれなかった。";
+      } else {
+        v = "メモ帳に、ゆっくり書かれた。\n\n";
+        v += "『帰り道は、まだ探している』\n\n";
+        v += "『店で朝を待てばいいと、言われたことがある。前に、ぼくも待った』\n\n";
+        v += "『時計は進んだのに、外は明るくならなかった』\n\n";
+        v += "それ以上は、書かれなかった。";
+      }
+      addNote("quiet_way","静かな客「前に待ったことがある。時計は進んだのに、外は明るくならなかった」");
+      return v;
+    }
+    var u;
+    if(R.talkWay){
+      u = "「カウンターの人は、店にいれば夜明けまで安全だって、言ってたんですけど」\n\n";
+      u += "「……あの人も、そう言うんだ」\n\n";
+      u += "静かな客は、窓の外の暗さを見た。\n\n";
+      u += "「ぼくも、そう言われたよ。前に、待ったことがある」\n\n";
+      u += "「時計は進んだのに、外は明るくならなかった」\n\n";
+      u += "それ以上は、言わなかった。";
+    } else if(R.shopStay){
+      u = "「店主さんは、夜明けまでいていいって、言ってたんですけど」\n\n";
+      u += "「……そう、言われたんだ」\n\n";
+      u += "静かな客は、窓の外の暗さを見た。\n\n";
+      u += "「前に、ぼくも待ったよ」\n\n";
+      u += "「時計は進んだのに、外は明るくならなかった」\n\n";
+      u += "それ以上は、言わなかった。";
+    } else {
+      u = "「帰り道なら、ぼくも探してる」\n\n";
+      u += "静かな客は、窓の外の暗さを見た。\n\n";
+      u += "「店で朝を待てばいいって、言われたことがある。……前に、ぼくも待ったよ」\n\n";
+      u += "「時計は進んだのに、外は明るくならなかった」\n\n";
+      u += "それ以上は、言わなかった。";
+    }
+    addNote("quiet_way","静かな客「前に待ったことがある。時計は進んだのに、外は明るくならなかった」");
+    return u;
+  },
+  choices:[ {t:"話を続ける", to:"ask_quiet"} ]
+},
+ask_quiet_voice: {
+  img:"🤫",
+  text:function(){
+    R.quietVoice = true;
+    if(M.quietVoiceless){
+      return "声のことを聞くと、彼はメモ帳の新しい頁を開いた。\n\n『声は、お代の方に入っていた』\n\nそれだけ書いて、頁を閉じた。\n\nいつ、どうしてかは、書かれなかった。";
+    }
+    return "「声が、小さいですね」\n\nそう聞くと、静かな客は少しだけ笑った。\n\n「出にくいんだ。前より、ずっと」\n\n「……そのうち、出なくなる気がする」\n\n理由は、言わなかった。";
+  },
+  choices:[ {t:"話を続ける", to:"ask_quiet"} ]
+},
+share_quiet: {
+  img:"🍞",
+  text:function(){
+    var t = "分け合うパンを、半分に割った。自然に、二つに割れた。\n\n";
+    t += "半分を、静かな客の前に置いた。「よかったら」\n\n";
+    t += "彼は少し驚いて、それから、小さく頷いた。\n";
+    if(M.quietVoiceless){
+      t += "一口食べて、メモ帳に『ありがとう』と書いた。";
+    } else {
+      t += "一口食べて、「……ありがとう」と言った。声は、小さかった。";
+    }
+    return t;
+  },
+  choices:[
+    {t:"話を続ける", to:"ask_quiet", do:function(){ R.sharedWake = true; R.wakeHalf = true; }},
+    {t:"席に戻る", to:"hub1", do:function(){ R.sharedWake = true; R.wakeHalf = true; }}
+  ]
+},
+
+/* ---------- 初めての外出 ---------- */
+out_gate: {
+img:"🚪",
+text:function(){
+var t = "「少し、外を見てきます」\n\n店主は止めなかった。\n「お気をつけて。森は、夜は道が変わりますから」\n\nドアを開けると、白い犬が待っていた。ついては来ない。ただ、森の入口まで並んで歩いた。\n\n店の明かりが後ろで小さくなった時、初めて、ここがどれだけ暗い場所か分かった。";
+if(loopN()>=2) t += "\n\n店の屋根の端に、カラスが止まっていた。こちらを見ていた。";
+if(isRain()) t += "\n\n雨が、葉を叩いていた。";
+return t;
+},
+choices:[
+ {t:"森へ進む", to:"out_fork"},
+ {t:"白い犬に、パンの半分をあげる", to:"share_dog", if:function(){ return hasBread("wake") && !R.sharedWake; }},
+ {t:"カラスの写真を撮る", to:"photo_crow", if:function(){ return loopN()>=2 && !hasPhoto("crow"); }}
+]
+},
+share_dog: {
+img:"🐕",
+text: "分け合うパンを、半分に割った。自然に、二つに割れた。\n\nしゃがんで、半分を、白い犬の前に置いた。\n\n犬は、匂いを嗅いでから、ゆっくり食べた。食べ終わっても、ついては来なかった。\n\nただ、森の入口で、私が振り返るまで、こちらを見ていた。",
+choices:[ {t:"森へ進む", to:"out_fork", do:function(){ R.sharedWake = true; R.wakeHalf = true; }} ]
+},
+out_fork: {
+img:"🌿",
+onEnter:function(){ R.phase = Math.max(R.phase, 2);},
+text: "三つに分かれる場所に出た。\n\nどの道も同じくらい暗く、同じくらい静かだった。スマホの明かりは、足元しか照らさない。",
+choices:[
+{t:"左の道を進む", to:"out_deep", do:function(){ R.forkChoice = "left";}},
+{t:"真ん中の道を進む", to:"out_deep", do:function(){ R.forkChoice = "center";}},
+{t:"右の道を進む", to:"out_deep", do:function(){ R.forkChoice = "right";}},
+{t:"買っておいたパンを食べる", to:"eat_out", if:function(){ return hasEdible() && R.hunger>=2;}, do:function(){ R._pendingEat = edibleId(); R._eatReturn = "out_fork";}},
+{t:"黒いパンを食べる", to:"eat_out", if:function(){ return hasBread("kuro") && R.hunger>=2;}, do:function(){ R._pendingEat = "kuro"; R._eatReturn = "out_fork";}},
+{t:"持ってきたおにぎりを食べる", to:"eat_bring", if:function(){ return R.bring==="onigiri" && !R.bringEaten && R.hunger>=2;}, do:function(){ R._eatReturn = "out_fork";}},
+{t:"店の明かりを、もう一度確かめる", to:"out_look", if:function(){ return!R.looked;}, do:function(){ R.looked = true;}}
+]
+},
+out_look: {
+img:"👀",
+text: "振り返ると、店の明かりが見えた。\n\n思っていたより、小さかった。歩いてきた距離の割に。\n\n……方角も、少しだけ、思っていたのと違った。",
+choices:[ {t:"三叉路に戻る", to:"out_fork"}]
+},
+out_deep: {
+img:"🌲",
+onEnter:function(){ bumpHunger(1);},
+text:function(){
+var t = "道は、思ったより森の奥へ続いていた。\n\n大きな木の幹に、誰かが付けた古い傷があった。目印のつもりだったのかもしれない。\nその先で、小さな流れの音がした。水辺は近いはずなのに、音だけが遠かった。\n\n時計を見た。針の進み方が、店にいた時と少し違う気がした。";
+if(hasBread("omosa")) t += "\n\nポケットの重さの変わるパンが、店を出た時より、軽くなっていた。";
+return t;
+},
+choices:[
+{t:"流れの音の方へ、もう少し進む", to:"out_deeper"},
+{t:"引き返す", to:"out_turn"}
+]
+},
+out_deeper: {
+img:"🌲",
+onEnter:function(){ bumpHunger(1); R.deepWent = true;},
+text: "流れの音は、近づいても遠いままだった。\n\nしばらく歩いて、足が止まった。\n\n目の前に、大きな木があった。幹に、古い傷。\n\n――さっき、通った木だった。\n\n後ろを向いた。来た方の先に、流れの音がしていた。",
+choices:[ {t:"来た道を戻る", to:"out_turn"}]
+},
+out_turn: {
+img:"↩️",
+text:function(){
+if(R.deepWent) return "進んでも、同じ所へ戻るだけだった。\n\n来た道を、戻る。音だけを置いて、森を離れた。";
+return "流れの音は、近づきそうになかった。時計の針の進み方も、店にいた時と違った。\n\n来た道を、戻る。";
+},
+choices:[
+{t:"店の明かりを頼りに、戻る", to:"out_lost"},
+{t:"買っておいたパンを食べる", to:"eat_out", if:function(){ return hasEdible() && R.hunger>=2;}, do:function(){ R._pendingEat = edibleId(); R._eatReturn = "out_turn";}},
+{t:"黒いパンを食べる", to:"eat_out", if:function(){ return hasBread("kuro") && R.hunger>=2;}, do:function(){ R._pendingEat = "kuro"; R._eatReturn = "out_turn";}},
+{t:"持ってきたおにぎりを食べる", to:"eat_bring", if:function(){ return R.bring==="onigiri" && !R.bringEaten && R.hunger>=2;}, do:function(){ R._eatReturn = "out_turn";}},
+{t:"店には戻らず、このまま森を抜ける", to:"final_walk", if:function(){ return R.final && !R.finalBroken;}}
+]
+},
+eat_out: {
+img:"🍞",
+text:function(){
+var id = R._pendingEat;
+var pre = "お腹が、空いていた。\n\n";
+if(id==="oto") return pre + "買っておいた、音のしないパンを食べた。\n\nちぎっても、噛んでも、音がしなかった。森の静けさと、同じだった。\n\nお腹が、落ち着いた。";
+if(id==="wake"){
+if(R.wakeHalf) return pre + "分け合うパンの、残りの半分を食べた。\n\n温かくて、ほんの少し甘い。お腹が、落ち着いた。";
+return pre + "分け合うパンを、一人で食べた。\n\n特に、何も起きなかった。お腹が、落ち着いた。";
+}
+if(id==="kinou"){ M.truthShop = true; return pre + "昨日のパンを食べた。\n\n固くて、少し酸っぱい。\n\n噛んでいるうちに、知らないはずの光景が、ふっと浮かんだ。朝の光の中で、窯の前に立つ、誰かの背中。店が、朝に開いているところ。\n\n……誰の記憶だったんだろう。\n\nお腹が、落ち着いた。"; }
+if(id==="nioi") return pre + "匂いのないパンを食べた。\n\n味が、ほとんどなかった。噛む感触だけがあった。\n\n食べ終えても、お腹が空いたままのような気がした。";
+if(id==="omosa") return pre + "重さの変わるパンを食べた。\n\n手の中では軽かったのに、噛むと、しっかり重さがあった。\n\nお腹が、落ち着いた。";
+if(id==="kuro"){ R.kuroAte = true; return pre + "黒いパンを、食べた。\n\n味がしなかった。いや――味というより、匂いの記憶が先に来た。窯の煙と、雨の日の土と、知らない家の台所。\n\nどれも、私の記憶ではなかった。\n\nお腹が、落ち着いた。"; }
+return pre + "買っておいた丸いパンを食べた。\n\n温かくて、柔らかくて、ほんの少し甘い。お腹が、落ち着いた。";
+},
+choices:[
+{t:"三叉路に戻る", to:"out_fork", if:function(){ return R._eatReturn==="out_fork";}, do:function(){ var pe1 = R._pendingEat; takeBread(pe1); R._pendingEat=""; R.hunger = (pe1==="nioi") ? 1 : 0;}},
+{t:"引き返しはじめる", to:"out_turn", if:function(){ return R._eatReturn==="out_turn";}, do:function(){ var pe2 = R._pendingEat; takeBread(pe2); R._pendingEat=""; R.hunger = (pe2==="nioi") ? 1 : 0;}}
+]
+},
+out_lost: {
+img:"🌫️",
+onEnter:function(){ bumpHunger(1);},
+text:function(){
+var t = "店の明かりを頼りに、戻った。\n\n";
+t += "一度、明かりが木の向こうに消えて、違う方角に現れた。\n";
+if(!R.deepWent) t += "同じ木の前を、二度通った。二度目は、傷が逆の側にあった。\n";
+t += "やっと明かりが大きくなった時、時計は、思っていたよりずっと進んでいた。\n\n";
+t += "店の近くまで来た時、足元の落ち葉の上に、古いパンくずが点々と落ちているのを見た。乾いて、白っぽい。誰が落としたのかは、分からなかった。";
+addNote("crumb_old","店の近くの落ち葉の上に、乾いた古いパンくずが点々と落ちていた。");
+return t;
+},
+choices:[ {t:"店に戻る", to:function(){ if(!R.phoneDone && loopN()>=2) return "phone_call"; if(R.bring==="onigiri" && !R.bringEaten && !R.bringShared && !R.smellDone && !hasBread("nioi")) return "smell_check"; return "back_shop"; }}]
+},
+
+/* ---------- 帰店、食事 ---------- */
+back_shop: {
+img:"🔔",
+onEnter:function(){ R.phase = Math.max(R.phase, 3); if(R.final) R.finalBroken = true; },
+text:function(){
+var t = "ベルが鳴ると、店主が顔を上げた。\n\n「おかえりなさい」\n\n";
+t += "外の寒さと暗さの分だけ、店の温かさが身にしみた。";
+var hw = hungerWord(); if(hw) t += "\n\n" + hw;
+return t;
+},
+choices:[
+{t:"店主に、パンを頼む", to:"order_bread", if:function(){ return R.hunger>=2;}},
+{t:"席に戻る", to:"return_seat"}
+]
+},
+order_bread: {
+img:"🍞",
+text: "「あの、パンを、もう一ついただけますか」\n\n「お腹が、空いてしまって」\n\n店主は、棚から丸いパンを取って、皿に乗せた。\n\n「お代は――」\n\n少しだけ、間があった。\n\n「帰れてからで、構いませんよ」\n\n冊子に、また何か書き込んでいた。\n\nパンを食べた。温かさが、指先まで戻ってきた。",
+choices:[
+{t:"席に戻る", to:"return_seat", do:function(){ R.hunger = 0; if(R.final) R.finalBroken = true; addNote("order_debt","追加のパンを頼んだら、店主は「お代は、帰れてからで構いません」と言った。");}}
+]
+},
+/* ---------- 冊子 ---------- */
+return_seat: {
+img:"🪑",
+text: "席に戻った。\n\n店主が、カウンターで冊子を開いた。戻ってきた客の記録を、つけるつもりらしかった。\n\n書きかけたところで、奥の窯が、小さく鳴った。\n\n「窯を見てきますね」\n\n店主は、冊子を開いたまま、奥へ入っていった。\n\n――一切れの後、私の分として何か書いた、あの冊子だった。\n何を書いたのか、聞いても、教えてもらえなかった。",
+choices:[
+{t:"カウンターへ行って、自分の行だけ見る", to:"peek_go"},
+{t:"何もせず、席で待つ", to:"wait_quiet"}
+]
+},
+peek_go: {
+img:"📒",
+onEnter:function(){ R.peeked = true;},
+text:function(){
+var t = "カウンターの冊子は、開いたままだった。\n\n";
+t += "今日の頁らしい。細かい字で、日付と、名前と、買ったパンと、お代が並んでいる。\n\n";
+t += "自分の行を探した。名前も聞かれていないのに、書かれているはずの、自分の行を。\n\n";
+t += "……指が、先に止まったのは、別の頁だった。\n";
+t += "名前の欄の字が、一つだけ――私の字に、とてもよく似ていた。\n";
+t += "似ているだけだと思いたかった。けれど、字の癖までが、私のものだった。";
+addNote("counter_ledger","帳場の記録に、私の字によく似た字で書かれた名前があった。");
+return t;
+},
+choices:[ {t:"もう少し、店の中を見る", to:"explore_hub"}]
+},
+peek_return: {
+img:"🕯️",
+onEnter:function(){ R.noticedMaybe = true;},
+text:function(){
+var t = "奥から、足音がした。\n\n";
+t += "冊子を、そっと閉じた。開いていた頁が、どこだったのかは分からない。\n";
+if(R.hunger>=3) t += "席に戻る時、よろけて、カウンターの縁に手をついた。カップが、小さく鳴った。\n";
+t += "席に戻って、カップに口をつけた。カップは、もう冷めていた。\n\n";
+t += "店主が戻ってきた。カウンターの前で一度だけ、視線が止まった。\n\n";
+t += "「お待たせしました」\n\n";
+t += "それだけだった。";
+addNote("peek_after","店主が戻ってきて、カウンターを一度見た。何も言わなかった。");
+return t;
+},
+choices:[ {t:"夜が更けるのを待つ", to:"late_intro"}]
+},
+wait_quiet: {
+img:"🕯️",
+text: "何もしなかった。\n\nカップのおかわりを飲んで、窓の外の暗さを見て、時々まどろんだ。\n店主は戻ってきて、冊子を閉じて、何事もなかったようにカウンターに立った。\n\n壁の時計が、3時を回った。窯の音が、来た時より少し弱くなっていた。",
+choices:[ {t:"夜が更けるのを待つ", to:"late_intro"}]
+},
+
+/* ---------- 店で待つ ---------- */
+wait_stay: {
+img:"🕯️",
+onEnter:function(){ R.phase = Math.max(R.phase, 2); bumpHunger(1); R.waited = true; },
+text: "席で、待つことにした。\n\n店主が、カップを新しいものに替えてくれた。\n\n壁の時計は、2時を回った。カウンター近くの客は、まだ笑っていた。窓際の客は、まだ窓の外を見ていた。\n\n待つのは、退屈だった。",
+choices:[ {t:"待ち続ける", to:"wait_stay2"} ]
+},
+wait_stay2: {
+img:"🌙",
+onEnter:function(){ R.phase = Math.max(R.phase, 3); bumpHunger(1); },
+text: "いつの間にか、まどろんでいた。\n\n目を開けると、店の中が少し暗くなっていた。窯の音が、来た時より弱い。\n\n客の姿は、なかった。帰ったところを、私は見ていない。\n\n壁の時計は、3時を回っていた。外は、まだ暗かった。",
+choices:[ {t:"夜明けを、待つ", to:"end_as"} ]
+},
+
+/* ---------- 閉店、出発 ---------- */
+late_intro: {
+img:"🌙",
+onEnter:function(){ R.phase = Math.max(R.phase, 4);},
+text: "店主は、まず窯の火を落とした。店の明かりが、半分ほど落ちる。\n\n壁の時計は、午前4時を回っていた。\n棚のパンの上に、布がかけられていく。閉店の支度だった。\n\n他の客の姿は、なかった。帰ったところを、私は見ていない。\n店主だけが、カウンターの向こうで静かに立っている。\n\n「夜明けが、近づいています」",
+choices:[ {t:"店のドアへ向かう", to:"late_hub"}]
+},
+late_hub: {
+img:"🚪",
+text: "店主が、ドアの看板を裏返した。ガラス越しに、『閉店』の字が見えた。\n\n「閉店です。店が消えると、明かりも消えてしまいます」\n\n「……出るなら、その前に、どうぞ」",
+choices:[
+{t:"店を出る", to:function(){ return R.gaveMorning ? "morning_farewell" : "depart_plain"; }},
+{t:"欠片を落としながら、店を出る", to:"depart_crumb", if:function(){ return hasScatterable() && !isRain(); }},
+{t:"店主に、持ってきたものを渡す", to:"give_food_late", if:function(){ return (R.bring==="onigiri" || R.bring==="tea") && !R.bringEaten && !R.bringShared; }},
+{t:"奥の部屋へ行く", to:"memo_stay", if:function(){ return R.roomEntered && M.recordsDeep>=2; }},
+{t:"「この店を、私に売ってください」と言う", to:"buyback_talk", if:function(){ return M.truthSelf && M.slips>=3; }, do:function(){ R.buybackFrom = "late"; }}
+]
+},
+depart_plain: {
+img:"🌲",
+onEnter:function(){ R.phase = 5; M.expNoScatter = true; saveAll(); },
+text:function(){
+var t = farewellText();
+t += "\n\n森は静かだった。自分の足音だけを頼りに、明かりの薄い方へ歩いた。";
+return t;
+},
+choices:[ {t:"歩き続ける", to:"walk_scene"}]
+},
+depart_crumb: {
+img:"🌲",
+onEnter:function(){ R.phase = 5; M.expScatter = true; saveAll(); },
+text:function(){
+var t = farewellText();
+t += "\n\n店の明かりが届かなくなる、最初の分かれ道で、足を止めた。\n\n";
+t += "この森は、普通に歩いても戻れない。それは、もう知っていた。\n\n";
+t += "進めなくなった時のために、パンを小さくちぎって、分かれ道ごとに置きながら進むことにした。\n\n";
+t += "欠片の列は、この分かれ道から始まっている。戻る時は、ここまで辿れば、あとは明かりが頼りになる。";
+return t;
+},
+choices:[
+{t:"歩き続ける", to:"walk_scene", do:function(){ takeScatterable(); R.scattered = true;}}
+]
+},
+walk_scene: {
+img:"🌲",
+text:function(){
+var t = "歩いて、歩いて――ふと、同じ形の木の前を、また通った気がした。\n\n";
+t += "街の明かりは、見えない。店の明かりも、もう見えなかった。";
+if(R.scattered) t += "\n\n後ろを振り返ると、欠片の列が、暗さの中に点々と続いていた。";
+var hw = hungerWord(); if(hw) t += "\n\n" + hw;
+return t;
+},
+choices:[
+{t:"歩き続ける", to:function(){ if(R.final && !R.finalBroken) return "call_final"; if(R.trustShop<=0) return "call_auto"; return "call_scene"; }},
+{t:"目印を辿って、店へ戻る", to:"crumb_return", if:function(){ return R.scattered;}}
+]
+},
+
+/* ---------- 呼びかけ ---------- */
+call_scene: {
+img:"🌲",
+text:function(){
+var t = "だいぶ歩いたところで、後ろから声がした。\n\n";
+t += "「お忘れ物ですよー」\n\n";
+t += "店主の声だった。足音は、しなかった。\n\n";
+if(R.peeked) t += "出る時、店主は忘れ物がないか聞いた。私は、ない、と答えたはずだった。\n";
+else t += "出る時、店主はそんなことを何も言わなかった。\n";
+t += "声は、もう一度した。今度は、後ろからだけでは、なかった気がした。";
+return t;
+},
+choices:[
+{t:"「何を、忘れましたか」と聞き返す", to:"call_ask"},
+{t:"振り返る", to:"call_turn"},
+{t:"足を止めて、声のする方を確かめる", to:"call_listen"}
+]
+},
+call_ask: {
+img:"🌲",
+text: "「何を、忘れましたか」\n\n間があった。それから、明かりが揺れた。\n\n木の向こうから、店主が歩いてきた。片手に明かり、もう片手に、小さな布を持っていた。\n\n「これですよ」\n\n白いハンカチだった。私の物みたいなのに、持っていた覚えが、なかった。",
+choices:[
+{t:"受け取る", to:"call_take"},
+{t:"「私のじゃ、ないです」と言う", to:"call_deny"}
+]
+},
+call_take: {
+img:"🏮",
+text: "受け取ると、店主はほっとしたように笑った。\n\n「よかった」\n\nハンカチは、私のポケットに入った。軽かった。\n\n「森の切れ目まで、お送りしますね」",
+choices:[
+{t:"店主についていく", to:"gate_home", do:function(){ R.callItem = "took"; addNote("call_item","店主から渡されたハンカチ。持っていた覚えのない物だった。");}}
+]
+},
+call_deny: {
+img:"🏮",
+text: "「私のじゃ、ないです」\n\n店主は少し首を傾けて、ハンカチを自分のポケットにしまった。\n\n「……そうですか」\n\n「では、切れ目まで、お送りします」",
+choices:[
+{t:"店主についていく", to:"gate_home", do:function(){ R.callItem = "denied";}}
+]
+},
+call_turn: {
+img:"🏮",
+text: "振り返った。誰も、いなかった。\n\n声は、もう一度した。「お忘れ物ですよー」\n\n今度は、前の方からだった。\n\n足が、止まった。――その時、後ろで明かりが揺れた。\n\n店主が、明かりと、白いハンカチを持って立っていた。\n\n「驚かせましたか。……これ、あなたの」\n\n私の物みたいなのに、持っていた覚えが、なかった。\n\n「切れ目まで、お送りしますね」",
+choices:[
+{t:"店主についていく", to:"gate_home", do:function(){ R.callItem = "shown";}}
+]
+},
+call_listen: {
+img:"🌲",
+text: "返事を、しなかった。足を止めて、耳を澄ました。\n\n足音は、やっぱりしなかった。声は、もう一度だけ、遠くでして、それきりだった。\n\n待って、待って、それから歩いた。\n\n気づくと、木の間から、見覚えのある街の明かりが見えていた。",
+choices:[ {t:"街の明かりへ向かう", to:function(){ return R.paidName ? "gate_name" : "end_sk"; }}]
+},
+gate_home: {
+img:"🌅",
+text: "店主は、森の切れ目まで送ってくれた。\n\n「ここから先は、まっすぐです」\n\n切れ目の向こうに、見覚えのある街の明かりがあった。朝の匂いがした。\n\n走って、駆け抜けた。振り返らなかった。",
+choices:[ {t:"家に、着く", to:function(){ if(R.paidName) return "gate_name"; if(R.callItem==="took") return "gate_ir"; return "end_td"; }}]
+},
+
+/* ---------- パンくずを辿って店へ戻る ---------- */
+crumb_return: {
+img:"🍞",
+text: "来た道を、戻った。最初のうちは、欠片はなかった。自分で歩いた分を、戻る。\n\nやがて、足元に欠片が見えた。そこからは、欠片を辿った。\n\n――ずいぶん、歩いた。行きに欠片を落としながら来た道のりより、長かった。\n\n途中で一度、店のベルらしい音が、横の方から聞こえた。立ち止まると、今度は前からだった。\n\n歩いているうち、靴の中に小さなものが入った。欠片だ。足裏に当たったけれど、止まらなかった。\n\n欠片は、やがて、なくなった。撒き始めた分かれ道だった。ここからは、明かりを頼りに歩いた。",
+choices:[ {t:"明かりへ向かう", to:"crumb_arrive"}]
+},
+crumb_arrive: {
+img:"🏮",
+text: "明かりが、近づいた。湯気の匂い。――パン屋だった。\n\n足裏の当たりが、強くなっていた。明かりの下で靴を脱ぐと、欠片が一つ、ころりと落ちた。\n指でつまんで、店先の落ち葉の上に捨てた。\n\n窓の向こうが、楽しそうだった。",
+choices:[ {t:"窓を、覗く", to:"end_kz"}]
+},
+
+/* ---------- エンディング ---------- */
+end_td: {
+img:"🏠", badge:"ENDING", horror:true, title:"ただいま",
+onEnter:function(){ reachEnding("tadaima");},
+text: "玄関の鍵は、普通に開いた。\n\n家の中は静かで、家族は寝ていた。冷蔵庫の音。洗濯物の匂い。いつもの家。\n\n「ただいま」\n\n小さい声で言った。誰も、起きなかった。",
+choices:[ {t:"――その後", to:"epi_td_1"}]
+},
+end_sk: {
+img:"🏠", badge:"ENDING", horror:true, title:"お客さんの席",
+onEnter:function(){ reachEnding("seki");},
+text: "玄関の鍵は、普通に開いた。\n\n誰も起きていなかった。靴を脱いで、台所の明かりをつけた。\n\n食卓に、朝の用意がしてあった。家族の人数分と――あと一人分。\nその席の前には、パンが置いてあった。\n\n湯気は、その席からだけ立っていた。",
+choices:[ {t:"――その後", to:"epi_sk_1"}]
+},
+end_kz: {
+img:"🪟", badge:"ENDING", horror:true, title:"パンくずの先",
+onEnter:function(){ reachEnding("kuzu");},
+text: "窓の向こうで、店主が笑っていた。\n\nその向かいに座って、楽しそうに話している客がいた。\n私の声で、私の知らない思い出話をしていた。\n\nこちらに気づいたその人が、店主にだけ聞こえる声で何か言った。\n店主が、初めてこちらを見た。\n\n少し、困ったように笑った。",
+choices:[ {t:"――その後", to:"epi_kz_1"}]
+},
+
+end_as: {
+img:"🛏️", badge:"ENDING", horror:true, title:"おはよう",
+onEnter:function(){ reachEnding("ohayo");},
+text: "目を開けると、天井だった。\n\n自分の部屋の天井。朝の明かりが、カーテンの隙間から差していた。\n\n私は、家のベッドの上にいた。\n\n店の席で、まどろんだところまでしか、覚えていなかった。\n\nどうやって帰ったのか、思い出せなかった。",
+choices:[ {t:"――その後", to:"epi_as_1"}]
+},
+epi_as_1: {
+img:"📅",
+text: "【翌日】\n\n普通の一日だった。\n\n朝、家族が言った。\n\n「昨夜は、遅かったね。帰ってきたの、気づかなかったよ」\n\n玄関の私の靴は、きれいだった。森を歩いたはずなのに、泥も、落ち葉も、ついていなかった。",
+choices:[ {t:"日が過ぎる", to:"epi_as_2"}]
+},
+epi_as_2: {
+img:"📅",
+text: "【3日目】\n\nスマホの時計が、止まるようになった。\n\n直しても、直しても、午前4時を少し回ったところで、止まってしまう。\n\nその度に、直した。それで、済むことだった。",
+choices:[ {t:"結末の画面へ", to:"end_screen"}]
+},
+
+/* ---------- 後日談：「ただいま」 ---------- */
+epi_td_1: {
+img:"📅",
+text:function(){
+var t = "【翌日】\n\n普通の一日だった。仕事をして、ごはんを食べて、笑った。\n森のことも、店のことも、誰にも話さなかった。話すほどのことでもないと思った。\n";
+if(R.callItem==="took") t += "\nコートのポケットに、ハンカチが入っていた。店で受け取った、あの白いハンカチ。タンスの引き出しに、しまった。\n";
+t += "\n夜、布団に入ってから、玄関の方で小さな音がした。\n\nノックともつかない音。指先で、ドアを確かめるみたいな音が、一度だけ。\n\n家族は、誰も起きなかった。";
+return t;
+},
+choices:[ {t:"日が過ぎる", to:"epi_td_2"}]
+},
+epi_td_2: {
+img:"📅",
+text: "【3日目の夜】\n\n午前0時、玄関のチャイムが鳴った。\n\n家族は、誰も起きなかった。私だけが起きて、ドアの前に立った。\n覗き穴の向こうに、人が立っていた。\n\nパンを持った、私だった。\n\n「ただいま」\nドアの向こうで、私が言った。",
+choices:[ {t:"日が過ぎる", to:"epi_td_3"}]
+},
+epi_td_3: {
+img:"📅",
+text: "【一週間後】\n\nチャイムは、毎晩鳴るようになった。\n\n昨夜は、思い切って、スマホで写真を撮った。ドアの向こうの、私を。\n\n写真の中の私は、パンと、私の鞄を持っていた。\n\nでも、昨夜ドアの向こうにいた私は、パンしか持っていなかった。\n鞄は、今日一日、私の部屋にあった。",
+choices:[ {t:"日が過ぎる", to:"epi_td_4"}]
+},
+epi_td_4: {
+img:"📅",
+text: "【昨夜】\n\nチャイムが鳴る前に、玄関に立っていた。\n\n私の後ろに、家族も並んでいた。外の私を待つみたいに、静かに。\n\nそれから――内側から、ドアを開ける音がした。\n\n誰が開けたのかは、見ていない。",
+choices:[ {t:"結末の画面へ", to:"end_screen"}]
+},
+
+/* ---------- 後日談：「パンくずの先」 ---------- */
+epi_kz_1: {
+img:"📅",
+text: "【翌日】\n\n朝、店の中で目が覚めた。\n\n窓のそばの席だった。目の前には、温かいコップが置かれていた。\n\n店主が、カウンターの向こうで「おはようございます」と言った。普通の声だった。\n\n窓の外は、朝の森だった。店の中は、昨夜のままだった。\n\nスマホの写真を見た。昨夜の、最後の一枚。\n店の窓を、外から撮った写真だった。撮った覚えはなかった。\n\n窓の向こうに、二人、座っていた。",
+choices:[ {t:"日が過ぎる", to:"epi_kz_2"}]
+},
+epi_kz_2: {
+img:"📅",
+text: "【4日目】\n\n店に、客が来た。見知らぬ人だった。\n\n店主が「いらっしゃいませ」と言って、私は、その人を見た。\n\nその人は、私を見て、ほんの少しだけ、怯えた顔をした。\n\n理由は、分からなかった。\n\n私の席のコップは、頼んでいないのに、また温かくなっていた。",
+choices:[ {t:"日が過ぎる", to:"epi_kz_3"}]
+},
+epi_kz_3: {
+img:"📅",
+text: "【一週間後】\n\n夜ごとに、私は窓のそばの席に座っている。\n\n今夜、窓の外の暗さの中に、人が立っていた。こちらを見ている。\n\n立ち姿が、少しだけ、私に似ていた。\n\nドアのベルが、鳴った。",
+choices:[ {t:"結末の画面へ", to:"end_screen"}]
+},
+
+/* ---------- 後日談：「お客さんの席」 ---------- */
+epi_sk_1: {
+img:"📅",
+text: "【翌日】\n\n普通の一日だった。\n\n夜、家族と食卓を囲んだ。用意された席が、一つ多かった。\n\n誰も、何も言わなかった。数え間違いだと、思った。",
+choices:[ {t:"日が過ぎる", to:"epi_sk_2"}]
+},
+epi_sk_2: {
+img:"📅",
+text: "【3日目】\n\n朝、食卓に、パンが一つ置かれていた。店で見たのと、同じ形のパン。まだ、温かかった。\n\n「昨夜のお客さん、いい人だったね」\n\n家族が、笑いながら言った。\n\n誰が来たのか、私だけが知らなかった。",
+choices:[ {t:"日が過ぎる", to:"epi_sk_3"}]
+},
+epi_sk_3: {
+img:"📅",
+text: "【一週間後】\n\n夕食の用意をする時、家族は、迷いなく一人分多く席を作った。\n\n私の席の前にも、湯気の立つコップが置かれていた。\n\n「今日は、早く帰れたね」\n\n家族が、私に言った。\n\n私は、今日一日、家にいた。",
+choices:[ {t:"結末の画面へ", to:"end_screen"}]
+},
+
+/* ---------- 結末画面 ---------- */
+end_screen: {
+img:"🌙", badge:"結末",
+text:function(){
+var names = { tadaima:"ただいま", kuzu:"パンくずの先", seki:"お客さんの席", ohayo:"おはよう", irasshai:"いらっしゃい", nameless:"名前のない客", memo:"メモの書き手", nochoice:"選べない", owner:"新しい店主", shopmorning:"店主の朝", trueend:"朝の食卓"};
+var t = "「" + (names[R.endedId] || "") + "」\n\n";
+if(R.reread){ t += "その夜のことは、ここまでだった。"; return t;}
+t += "夜は終わった。……終わった、はずだった。\n\n";
+t += "手帳には、今夜のことがいくつか書き残されている。\n次の夜、店はまた午前0時に現れる。";
+return t;
+},
+choices:[
+{t:"次の夜へ", to:null, if:function(){ return!R.reread;}, do:function(){ finishRun();}},
+{t:"タイトルに戻る", to:null, if:function(){ return R.reread;}, do:function(){ R = newRun(); saveAll(); showTitle();}},
+{t:"これまでの結末を見る", to:null, do:function(){ openCollection();}}
+]
+},
+/* ---------- 買い戻し ---------- */
+buyback_talk: {
+img:"🔔",
+text: "「この店の、持ち主のことを、聞いてもいいですか」\n\n店主は、少し黙ってから、頷いた。\n\n「……前の持ち主は、この店を、客に売ったんです」\n\n「一度手放した店を、また買うかどうかは、買う側が言い出すことになっています。売り手からは、言えませんから」\n\n店主は、私の返事を待っていた。",
+choices:[
+{t:"「私に、売ってください」と言う", to:"buyback_yes"},
+{t:"「……やめておきます」と言う", to:function(){ return R.buybackFrom==="late"? "late_hub": "ask_shop";}, do:function(){ R.finalSawBuyback = true; saveAll();}}
+]
+},
+buyback_yes: {
+img:"🔔",
+text: "店主は、長いこと静かだった。\n\nそれから、カウンターの冊子を、静かに閉じた。\n\n「……分かりました」\n\n「ありがとうございます。長かった」",
+choices:[ {t:"店主を見送る", to:"owner_farewell"}]
+},
+owner_farewell: {
+img:"🚪",
+text: "店主は、棚の奥からコートを取り出して、羽織った。初めて見る姿だった。\n\nドアを開けて、森の暗さの中へ、一人で歩いていった。\n\n振り返らなかった。\n\n店の中は、急に広くなった。",
+choices:[ {t:"カウンターの内側に立つ", to:"end_owner"}]
+},
+
+/* ---------- 店主の朝への分岐 ---------- */
+morning_farewell: {
+img:"🌅",
+text: "ドアのところで、店主が足を止めた。\n\n外の食べ物のことを、思い出したような顔だった。\n\n「……行ってみます」\n\n店主は、ドアを開けた。朝の光が、細く差した。\n\n店主は一度だけ振り返って、少し笑って、外へ出た。\n\n店の明かりが、静かに落ちていった。",
+choices:[ {t:"暗くなった店の中に、残る", to:"end_tm"}]
+},
+
+/* ---------- メモの書き手への分岐 ---------- */
+memo_stay: {
+img:"📚",
+text: "奥の部屋の椅子に、座った。\n\n記録の束。今夜の頁は、まだ途中だった。\n\nペンを持つと、手が自然に動いた。続きを書くための、場所と姿勢を、体が知っていた。\n\n今夜は、ここで明かすことにした。",
+choices:[ {t:"記録の続きを、書く", to:"end_memo"}]
+},
+
+/* ---------- 最終夜 ---------- */
+final_walk: {
+img:"🌲",
+text: "店の明かりが、遠ざかった。\n\n何度も通ったはずの道なのに、初めて歩く気がした。\n\n手帳を開くと、自分の字が、少し乱れていた。",
+choices:[ {t:"歩き続ける", to:"call_final"}]
+},
+call_final: {
+img:"🌲",
+timeout:{sec:12, to:"true_dawn"},
+text: "だいぶ歩いたところで、後ろから声がした。\n\n「お忘れ物ですよー」\n\n店主の声だった。足音は、しなかった。\n\n声は、もう一度した。今度は、後ろからだけでは、なかった気がした。",
+choices:[
+{t:"「何を、忘れましたか」と聞き返す", to:"final_fail"},
+{t:"謝って、店に戻る", to:"final_fail"},
+{t:"「放っておいてください」と言い返す", to:"final_fail"}
+]
+},
+final_fail: {
+img:"🌲",
+text: "気づくと、振り返っていた。\n\n店主は、明かりと一緒に、すぐ後ろにいた。\n\n「送りますね」\n\n穏やかな声だった。",
+choices:[ {t:"店主についていく", to:"gate_home"}]
+},
+true_dawn: {
+img:"🌅",
+text: "返事を、しなかった。\n\n声は、もう一度だけ、遠くでした。それきりだった。\n\n歩いた。森の音が、だんだん、普通の音になっていった。\n\n鳥の声がした。\n\n木の間から、街の明かりが見えた。朝の、明かりだった。",
+choices:[ {t:"朝の光へ、歩いていく", to:"end_true"}]
+},
+
+/* ---------- 選べない ---------- */
+call_auto: {
+img:"🌲",
+text: "だいぶ歩いたところで、後ろから声がした。\n\n「お忘れ物ですよー」\n\n振り返らないでいようと、思っていた。\n\n――のに、体はもう、振り返っていた。\n\n「今のも、私が選んだんですか」\n\n喉まで出かかって、声にはならなかった。\n\n店主は、答えなかった。",
+choices:[ {t:"店主についていく", to:"gate_auto"}]
+},
+gate_auto: {
+img:"🌅",
+text: "店主は、森の切れ目まで送ってくれた。\n\nついていく足が、自分のもののように思えなかった。\n\n切れ目の向こうに、見覚えのある街の明かりがあった。",
+choices:[ {t:"家に、着く", to:"end_nc"}]
+},
+
+/* ---------- 名前・いらっしゃいの帰宅 ---------- */
+gate_name: {
+img:"🌅",
+text: "店主は、私の名前を呼ばなかった。\n\n「お客様、こちらです」\n\n森の切れ目まで送られて、街の明かりに駆け込んだ。\n\n家は、すぐそこだった。",
+choices:[ {t:"家に、着く", to:"end_nm"}]
+},
+gate_ir: {
+img:"🌅",
+text: "店主は、森の切れ目まで送ってくれた。\n\n「ここから先は、まっすぐです」\n\n切れ目の向こうに、見覚えのある街の明かりがあった。朝の匂いがした。\n\n鞄の中で、店の物が、小さく音を立てた。",
+choices:[ {t:"家に、着く", to:"end_ir"}]
+},
+
+/* ---------- エンディング：新しい店主 ---------- */
+end_owner: {
+img:"🏮", badge:"ENDING", horror:true, title:"新しい店主",
+onEnter:function(){ reachEnding("owner");},
+text: "カウンターの内側は、思ったより静かだった。\n\n冊子を開く手が、迷わなかった。書き方を、体が知っていた。\n\n――ベルが鳴った。\n\n顔を上げると、戸惑った顔の客が、立っていた。\n\n「いらっしゃい」\n\n私が言うと、客は少し怯えた。\n\n昔の自分も、あの顔をしていた気がした。もう、思い出せなかった。",
+choices:[ {t:"――その後", to:"epi_ow_1"}]
+},
+epi_ow_1: {
+img:"🏮",
+text: "\n\n客が来た。席に案内して、一切れを出した。\n\n「お代は、もういただいています」\n\n自分の声なのに、遠くで聞こえた。",
+choices:[ {t:"日が過ぎる", to:"epi_ow_2"}]
+},
+epi_ow_2: {
+img:"🏮",
+text: "\n\n冊子を開いた。\n\n客だった頃の私の頁があった。名前と、買ったパンと、お代の欄。全部、書かれていた。\n\n私の字で。",
+choices:[ {t:"日が過ぎる", to:"epi_ow_3"}]
+},
+epi_ow_3: {
+img:"🏮",
+text: "\n\nベルが鳴った。\n\n私によく似た客が、森の方から歩いてきた。戸惑った顔で、店の明かりを見上げていた。\n\n笑顔を作って、声をかけた。\n\n「いらっしゃ――」",
+choices:[ {t:"結末の画面へ", to:"end_screen"}]
+},
+
+/* ---------- エンディング：いらっしゃい ---------- */
+end_ir: {
+img:"🏠", badge:"ENDING", horror:true, title:"いらっしゃい",
+onEnter:function(){ reachEnding("irasshai");},
+text: "玄関の鍵は、普通に開いた。\n\n家の中から、明かりが漏れていた。家族が、起きていた。\n\nドアを開けると、家族全員が、同じ方を向いて立っていた。\n\n「いらっしゃい」\n\n全員の声が、揃っていた。",
+choices:[ {t:"――その後", to:"epi_ir_1"}]
+},
+epi_ir_1: {
+img:"🏠",
+text: "\n\n夕食の時、家族は私の席を用意しなかった。\n\n代わりに、玄関に近い席に、湯気の立つコップが置かれていた。\n\n「お客さんは、そちらへどうぞ」\n\n家族は、笑っていた。",
+choices:[ {t:"日が過ぎる", to:"epi_ir_2"}]
+},
+epi_ir_2: {
+img:"🏠",
+text: "\n\n夜、目が覚めた。隣のベッドで、もう一人の私が眠っていた。\n\n呼吸が、合っていた。私が息を止めると、あちらの胸も止まった。\n\n家族は、何も言わなかった。",
+choices:[ {t:"日が過ぎる", to:"epi_ir_3"}]
+},
+epi_ir_3: {
+img:"🏠",
+text: "\n\n朝、玄関で靴を履いていると、後ろで家族の声がした。\n\n「行ってらっしゃい」\n\n振り返ると、家族全員が、同じ方を向いていた。\n\nベッドの方からも、小さく、寝息が聞こえた。",
+choices:[ {t:"結末の画面へ", to:"end_screen"}]
+},
+
+/* ---------- エンディング：名前のない客 ---------- */
+end_nm: {
+img:"🏠", badge:"ENDING", horror:true, title:"名前のない客",
+onEnter:function(){ reachEnding("nameless");},
+text: "玄関の鍵は、普通に開いた。\n\n家族が、顔を上げた。\n\n「……どなた、でしたっけ」\n\n私の部屋は、物置になっていた。段ボールと、季節外れの扇風機。\n\n「お客さんなら、そちらの部屋へ」\n\n家族は、客用の布団を出してくれた。",
+choices:[ {t:"――その後", to:"epi_nm_1"}]
+},
+epi_nm_1: {
+img:"🏠",
+text: "\n\n家族は、朝食の席を、私の分だけ用意しなかった。\n\n「うちは、昔からこの人数ですから」\n\n私の茶碗は、食器棚の奥にしまわれていた。",
+choices:[ {t:"日が過ぎる", to:"epi_nm_2"}]
+},
+epi_nm_2: {
+img:"🏠",
+text: "\n\nスマホの連絡先から、自分の名前が消えていた。\n\n代わりに「お客様」という名前で、自分の番号が登録されていた。\n\n誰が登録したのかは、分からなかった。",
+choices:[ {t:"日が過ぎる", to:"epi_nm_3"}]
+},
+epi_nm_3: {
+img:"🏠",
+text: "\n\n夜中に目が覚めて、店で撮った棚の写真を見た。\n\n写真の棚に、私の名前の書かれたパンが、二つ並んでいた。\n\n撮った時は、一つだった。\n\n自分の名前を、声に出して言おうとした。最初の音で、止まった。",
+choices:[ {t:"結末の画面へ", to:"end_screen"}]
+},
+
+/* ---------- エンディング：メモの書き手 ---------- */
+end_memo: {
+img:"📚", badge:"ENDING", horror:true, title:"メモの書き手",
+onEnter:function(){ reachEnding("memo");},
+text: "記録の続きを書いた。\n\n今夜の客のこと。買ったパン。お代のこと。\n\n書き終えて、頁を戻した。今夜の最初の行は、私が書いたのではなかった。\n\nでも、字は私の字だった。\n\n奥の部屋の外で、店の明かりが、静かに落ちた。",
+choices:[ {t:"――その後", to:"epi_mm_1"}]
+},
+epi_mm_1: {
+img:"📚",
+text: "\n\n客が来た。私は、カウンターの向こうで記録を開いた。\n\n客の名前を書く手が、迷わなかった。聞いていないのに、知っていた。\n\n客は、私の顔を見て、少し怯えていた。",
+choices:[ {t:"日が過ぎる", to:"epi_mm_2"}]
+},
+epi_mm_2: {
+img:"📚",
+text: "\n\n今夜の記録を、先に書いてみた。\n\n客は、丸いパンを買う。お代は、花を生け直すこと。\n\n夜が終わる頃、その通りのことが、全部起きていた。\n\n違うのは、一つだけだった。客の顔が、私に似ていたこと。",
+choices:[ {t:"日が過ぎる", to:"epi_mm_3"}]
+},
+epi_mm_3: {
+img:"📚",
+text: "\n\n手帳を閉じた。\n\n店のどこかで、ペンの音が続いていた。\n\n私の手は、止まっているのに。\n\n音は、今夜の頁を、まだ書いていた。",
+choices:[ {t:"結末の画面へ", to:"end_screen"}]
+},
+
+/* ---------- エンディング：選べない ---------- */
+end_nc: {
+img:"🏠", badge:"ENDING", horror:true, title:"選べない",
+onEnter:function(){ reachEnding("nochoice");},
+text: "玄関の鍵は、普通に開いた。\n\n家の中は静かで、家族は寝ていた。\n\n「ただいま」\n\n言ったはずだった。言ったかどうかは、思い出せなかった。\n\n気づくと、布団の中にいた。着替えた記憶も、なかった。",
+choices:[ {t:"――その後", to:"epi_nc_1"}]
+},
+epi_nc_1: {
+img:"🏠",
+text: "\n\n朝、目が覚めた時には、もう着替え終わっていた。\n\n朝食は、食べ終わっていた。味は、思い出せなかった。\n\n家族が言った。\n\n「今日は、早いね。いつもより、迷わないね」",
+choices:[ {t:"日が過ぎる", to:"epi_nc_2"}]
+},
+epi_nc_2: {
+img:"🏠",
+text: "\n\n買い物から帰ると、袋の中に、選んだ覚えのない物が入っていた。\n\n家族の好物と、私の嫌いな物が、一つずつ。\n\nレシートの時刻は、私が店にいた時間だった。\n\n私は、選んで――",
+choices:[ {t:"結末の画面へ", to:"end_screen"}]
+},
+
+/* ---------- エンディング：店主の朝 ---------- */
+end_tm: {
+img:"🏮", badge:"ENDING", horror:true, title:"店主の朝",
+onEnter:function(){ reachEnding("shopmorning");},
+text: "店の明かりが、落ちた。\n\n暗さの中で、窯の火の匂いだけが残った。\n\n椅子に座って、目を閉じた。次に目を開けた時、店の中は、昨夜のままだった。\n\nただし、カウンターの内側だった。",
+choices:[ {t:"――その後", to:"epi_tm_1"}]
+},
+epi_tm_1: {
+img:"🌅",
+text: "\n\n朝の光が、窓いっぱいに入った。\n\n普通の台所で、普通の朝ごはんを作った。卵の焼ける匂い。ラジオの天気予報。\n\n笑いながら、パンを齧った。\n\nこんな朝が、ずっと欲しかった。",
+choices:[ {t:"日が過ぎる", to:"epi_tm_2"}]
+},
+epi_tm_2: {
+img:"🏮",
+text: "\n\n店は、今夜も開いていた。\n\n私は、カウンターの内側で客を待った。\n\n鞄の中身を確かめた。スマホが、なかった。昨夜は、あったはずだった。",
+choices:[ {t:"日が過ぎる", to:"epi_tm_3"}]
+},
+epi_tm_3: {
+img:"🌅",
+text: "\n\n買い物の帰りに、森の入口の前を通った。\n\n店は、なかった。ただの、木と闇だった。\n\n少しだけ立ち止まって、それから、歩き出した。\n\n後ろで、ベルの音がした気がした。",
+choices:[ {t:"日が過ぎる", to:"epi_tm_4"}]
+},
+epi_tm_4: {
+img:"🏮",
+text: "\n\n鞄の中身を、確かめた。鍵も、財布も、なかった。パンだけがあった。\n\n目が覚めたのは、カウンターの内側だった。",
+choices:[ {t:"結末の画面へ", to:"end_screen"}]
+},
+
+/* ---------- エンディング：朝の食卓（トゥルー） ---------- */
+end_true: {
+img:"🌅", badge:"ENDING", title:"朝の食卓",
+onEnter:function(){ reachEnding("trueend");},
+text: "玄関の鍵は、普通に開いた。\n\n家の中では、家族が朝ごはんの支度をしていた。味噌汁の匂い。焼き魚の音。\n\n「おかえり。遅かったね」\n\n「ただいま」\n\n食卓に座ると、温かいごはんが出てきた。\n\n窓の外は、普通の朝だった。森は、どこにも見えなかった。",
+choices:[ {t:"――その後", to:"epi_tr_1"}]
+},
+epi_tr_1: {
+img:"🌅",
+text: "\n\nよく眠れた。夢は、見なかった。\n\n朝ごはんを、家族と食べた。昨日の夕食のことも、ちゃんと思い出せた。\n\n仕事に行って、普通に帰ってきた。",
+choices:[ {t:"日が過ぎる", to:"epi_tr_2"}]
+},
+epi_tr_2: {
+img:"🌅",
+text: "\n\nスマホの写真を、整理した。\n\n森の写真が、何枚かあった。木と、闇と、朝の光。\n\n店も、犬も、誰も、写っていなかった。\n\nそれでいいと思った。",
+choices:[ {t:"日が過ぎる", to:"epi_tr_3"}]
+},
+epi_tr_3: {
+img:"🌅",
+text: "\n\n夕方、駅前で、よく似た人とすれ違った。\n\n向こうも、一瞬だけ振り返った。\n\nそれだけだった。\n\n家に帰ると、家族が夕食の支度をしていた。今夜は、私がパンを買ってきた。普通の、町のパン屋のパンだった。",
+choices:[ {t:"結末の画面へ", to:"end_screen"}]
+}
+,
+/* ---------- 持ち込みの受け渡し・食事 ---------- */
+give_food_hub: {
+img:"🍙",
+text:function(){
+var item = (R.bring==="tea") ? "お茶のペットボトル" : "おにぎり";
+var t = item + "を出すと、店主は少し驚いた顔をして、丁寧に礼を言った。\n\n「ありがとうございます。……外の物は、こちらに置いておきますね」\n\n店主はそれを、カウンターの端の、小さな皿に置いた。食べはしなかった。";
+R.bringShared = true; saveAll();
+return t;
+},
+choices:[ {t:"席に戻る", to:"hub1"} ]
+},
+give_food_late: {
+img:"🍙",
+onEnter:function(){ R.gaveMorning = true; R.bringShared = true; },
+text:function(){
+var item = (R.bring==="tea") ? "お茶" : "おにぎり";
+var t = "閉店の支度をする店主に、" + item + "を渡した。\n\n店主は、長いことそれを見つめていた。\n\nそれから、少しだけ、口に運んだ。\n\n「……朝の、味がします」\n\n店主の手が、止まっていた。";
+addNote("slip_morning","店主が、外の食べ物を少し食べて、手を止めた。「朝の味がする」と言った。");
+saveAll();
+return t;
+},
+choices:[ {t:"ドアの方へ戻る", to:"late_hub"} ]
+},
+eat_bring: {
+img:"🍙",
+text:function(){
+var t = "お腹が、空いていた。\n\n持ってきたおにぎりを食べた。コンビニの、海苔と塩の味がした。\n\n森の中で、その味だけが、昼間の世界のものだった。\n\nお腹が、落ち着いた。";
+R.bringEaten = true; R.hunger = 0; saveAll();
+return t;
+},
+choices:[
+{t:"三叉路に戻る", to:"out_fork", if:function(){ return R._eatReturn==="out_fork"; }},
+{t:"引き返しはじめる", to:"out_turn", if:function(){ return R._eatReturn==="out_turn"; }},
+{t:"席に戻る", to:"hub1", if:function(){ return R._eatReturn!=="out_fork" && R._eatReturn!=="out_turn"; }}
+]
+},
+
+/* ---------- 電話の声 ---------- */
+phone_call: {
+img:"📱",
+onEnter:function(){ R.phoneDone = true; },
+text:function(){
+var t = "店の近くまで戻った時、ポケットの中で、スマホが鳴った。\n\n圏外だったはずの、スマホが。\n\n画面には、家の番号が出ていた。\n\n出ると、家族の声がした。懐かしくて、ほっとした。\n\n「もしもし？　どうしたの、こんな時間に」";
+if(M.reason==="cat") t += "\n\n電話の向こうで、猫の鳴き声がした気がした。";
+return t;
+},
+choices:[
+{t:"昨日の夕食のことを、聞いてみる", to:"phone_ask"},
+{t:"そのまま、少し話す", to:"phone_talk"},
+{t:"電話を切る", to:"phone_end"}
+]
+},
+phone_ask: {
+img:"📱",
+text:function(){
+var t = "「ねえ、昨日の夕食、何だった？」\n\n電話の向こうで、少し間があった。\n\n「……魚よ。焼き魚。あんた、好物でしょう」\n\n自信のある言い方だった。\n\n私の好物は、魚ではなかった。……はずだった。昨日の夕食そのものが、思い出せなかった。";
+addNote("phone_voice","電話の声は、昨日の夕食を「焼き魚」と言った。私の好物は、魚ではないはずだった。");
+saveAll();
+return t;
+},
+choices:[ {t:"電話を切って、店へ戻る", to:function(){ return destAfterOut(); }} ]
+},
+phone_talk: {
+img:"📱",
+text: "他愛のない話をした。明日の天気。冷蔵庫の中身。洗濯物のこと。\n\n声は、家族の声だった。\n\nでも、話の合間の笑い方だけが、少しだけ、録音のように同じだった。",
+choices:[ {t:"電話を切って、店へ戻る", to:function(){ return destAfterOut(); }} ]
+},
+phone_end: {
+img:"📱",
+text: "「ごめん、また掛ける」\n\n切ると、画面は圏外に戻っていた。\n\n着信の記録は、残っていなかった。",
+choices:[ {t:"店へ戻る", to:function(){ return destAfterOut(); }} ]
+},
+
+/* ---------- 匂いの指摘 ---------- */
+smell_check: {
+img:"🔔",
+onEnter:function(){ R.smellDone = true; },
+text: "店のドアまで来た時、内側から店主が出てきた。\n\n「おかえりなさい」\n\n店主は、私の鞄の方を、一瞬だけ見た。\n\n「……何か、匂いがしますね。パンの匂いでは、ないような」\n\n鞄の中には、おにぎりが入っていた。",
+choices:[
+{t:"正直に、おにぎりのことを言う", to:"smell_honest"},
+{t:"「何も、入っていません」と言う", to:"smell_lie", do:function(){ R.trustShop = 0; R.liedShop = true; saveAll(); }}
+]
+},
+smell_honest: {
+img:"🔔",
+text: "おにぎりのことを言うと、店主は頷いて、穏やかに言った。\n\n「そうですか。……店の中では、出さないでくださいね」\n\nそれだけだった。責める言い方は、しなかった。",
+choices:[ {t:"店に入る", to:"back_shop"} ]
+},
+smell_lie: {
+img:"🔔",
+text:function(){
+var t = "「何も、入っていません」\n\n店主は、私の顔を、それから鞄を、静かに見た。\n\n「……そうですか」\n\nそれ以上、何も言わなかった。笑顔も、変わらなかった。";
+addNote("smell_lie","おにぎりの匂いを聞かれて、ないと答えた。店主は、それ以上何も言わなかった。");
+saveAll();
+return t;
+},
+choices:[ {t:"店に入る", to:"back_shop"} ]
+},
+
+/* ---------- 新しいパンを買う ---------- */
+buy_kinou: {
+img:"🍞",
+text: "「昨日のパンですね。お代は――」\n\n店主は、私の顔を見た。\n\n「昨日の夕食を、思い出してください。それで、いいです」\n\n思い出そうとした。食卓の明かり。箸の音。……何を食べたのかが、どうしても出てこなかった。\n\n店主は、小さく頷いて、パンを紙に包んだ。",
+choices:[
+{t:"受け取る", to:"hub1", do:function(){ if(R.final) R.finalBroken = true; R.boughtBread="kinou"; R.paidPrice="昨日の夕食を思い出す"; giveBread("kinou"); addNote("price_kinou","昨日の夕食が、思い出せなかった。たぶん、魚だった気がする。"); }}
+]
+},
+buy_nioi: {
+img:"🍞",
+text: "「匂いのないパンですね。お代は――」\n\n店主は、奥の窯の方を見た。\n\n「窯の音を、覚えておいてください」\n\n窯の音。火のはぜる、小さな音だった。思い出すと、店主が頷いた。\n\nパンは、持っても匂いがしなかった。",
+choices:[
+{t:"受け取る", to:"hub1", do:function(){ if(R.final) R.finalBroken = true; R.boughtBread="nioi"; R.paidPrice="窯の音を覚える"; giveBread("nioi"); }}
+]
+},
+buy_omosa: {
+img:"🍞",
+text: "「重さの変わるパンですね。お代は――」\n\n店主は、少し考える顔をした。\n\n「帰り道を、一つ、忘れてください。どの道でも、いいです」\n\n忘れようとしても、忘れる道を選ぶこと自体が、思い出すことのようだった。\n\nそれでも店主は頷いて、パンを渡した。手の中で、思ったより重かった。",
+choices:[
+{t:"受け取る", to:"hub1", do:function(){ if(R.final) R.finalBroken = true; R.boughtBread="omosa"; R.paidPrice="帰り道を一つ忘れる"; giveBread("omosa"); }}
+]
+},
+buy_kuro_buy: {
+img:"🍞",
+text: "「黒いパンを、買いたいんです」\n\n店主は、長いこと黙っていた。\n\n「……お代は、高いですよ」\n\n「何を、払えばいいんですか」\n\n「あなたの、名前です。ここに、置いていけるなら」\n\n店主は、それ以上、何も言わなかった。",
+choices:[
+{t:"名前を置いて、受け取る", to:"hub1", do:function(){ R.kuroBought = true; R.paidName = true; giveBread("kuro"); takePhoto("shelf"); addNote("price_name","黒いパンのお代に、名前を置いてきた。何と呼ばれていたかは、まだ覚えている。"); saveAll(); }},
+{t:"やめておく", to:"shelf"}
+]
+},
+
+/* ---------- 店内探索 ---------- */
+explore_hub: {
+img:"🕯️",
+text:function(){
+var t = "店主は、奥に入ったままだった。\n\n冊子の頁の続きが、気になっていた。自分の行だけ、もう一度見たかった。";
+if(R.explored>=1) t += "\n\n窯の音の向こうで、店は静かだった。";
+return t;
+},
+choices:[
+{t:"帳場の記録を、もう一度見る", to:"explore_records"},
+{t:"厨房の方を、覗く", to:"explore_kitchen"},
+{t:"客席の忘れ物を、見る", to:"explore_left"},
+{t:"奥の部屋の扉を、見る", to:"explore_door"},
+{t:"席に戻る", to:"peek_return"}
+]
+},
+explore_records: {
+img:"📒",
+onEnter:function(){ R.explored++; },
+text:function(){
+var t;
+if(!R.recordsRead){
+  R.recordsRead = true;
+  t = "帳場の記録は、頁ごとに、夜の日付が並んでいた。\n\nどの頁にも、客の名前と、買ったパンと、お代。\n\n頁を繰ると、古い夜ほど、名前の字が読みにくかった。消えかけているのではなかった。最初から、ああいう字だった。";
+} else {
+  t = "記録の、奥の方の頁を開いた。\n\nそこには「奥の部屋に、続きを置く」とだけ書かれた頁があった。\n\n字は、私の字だった。";
+  R.doorHint = true;
+}
+saveAll();
+return t;
+},
+choices:[ {t:"調べるのを続ける", to:function(){ return (R.explored>=3 && !R.hidOnce) ? "explore_hide" : "explore_hub"; }} ]
+},
+explore_kitchen: {
+img:"🍳",
+onEnter:function(){ R.explored++; },
+text:function(){
+var t = "厨房の入口から、窯が見えた。\n\n焼き上がったパンが、並んでいた。今夜の客の数より、ずっと多かった。\n\n誰の分なのかは、分からなかった。";
+if(loopN()>=4) t += "\n\n壁には、エプロンが二つ掛かっていた。一つは、店主のもの。一つは、少し小さかった。";
+return t;
+},
+choices:[ {t:"調べるのを続ける", to:function(){ return (R.explored>=3 && !R.hidOnce) ? "explore_hide" : "explore_hub"; }} ]
+},
+explore_left: {
+img:"🧺",
+onEnter:function(){ R.explored++; },
+text: "客席の隅に、忘れ物の箱があった。\n\n傘が一本、手袋が片方、誰かの手帳。\n\n傘の持ち手には、小さな名札が付いていた。",
+choices:[
+{t:"傘の名札を見る", to:"explore_umbrella"},
+{t:"誰かの手帳を読む", to:"explore_diary"},
+{t:"調べるのを続ける", to:function(){ return (R.explored>=3 && !R.hidOnce) ? "explore_hide" : "explore_hub"; }}
+]
+},
+explore_umbrella: {
+img:"☂️",
+text:function(){
+var t = "名札には、" + prevGuestName() + "と書かれていた。\n\n隅の席の客が名乗った名前とは、違っていた。\n\n先週の雨の日に、置いていったのだろうか。……この店に、先週が、あるのだろうか。";
+addNote("umbrella_name","忘れ物の傘の名札と、隅の席の客の名乗った名前が、違っていた。");
+saveAll();
+return t;
+},
+choices:[ {t:"調べるのを続ける", to:function(){ return (R.explored>=3 && !R.hidOnce) ? "explore_hide" : "explore_hub"; }} ]
+},
+explore_diary: {
+img:"📓",
+onEnter:function(){ M.truthForest = true; saveAll(); },
+text:function(){
+var t = "手帳の持ち主の字は、震えていた。\n\n『三日目。まだ朝が来ない。店主は嘘をつかない。だから怖い』\n\n『森は、人を呼ぶ。呼ばれた者は、店を持つか、客でいるかしかない』\n\n最後の頁は、字の途中で切れていた。";
+addNote("diary_forest","誰かの手帳に『森は人を呼ぶ。呼ばれた者は店を持つか、客でいるかしかない』とあった。");
+saveAll();
+return t;
+},
+choices:[ {t:"調べるのを続ける", to:function(){ return (R.explored>=3 && !R.hidOnce) ? "explore_hide" : "explore_hub"; }} ]
+},
+explore_door: {
+img:"🚪",
+onEnter:function(){ R.explored++; },
+text:function(){
+if(R.doorHint){
+  return "一番奥に、開けてはいけないと言われていない扉があった。\n\n……言われていない。誰にも、止められていない。\n\n記録にあった「奥の部屋」は、この向こうらしかった。\n\n鍵は、掛かっていなかった。";
+}
+return "一番奥に、小さな扉があった。\n\n鍵は、掛かっていなかった。\n\n開ける理由が、まだなかった。気になるだけでは、手が伸びなかった。";
+},
+choices:[
+{t:"扉を開ける", to:"room_records", if:function(){ return !!R.doorHint; }},
+{t:"調べるのを続ける", to:function(){ return (R.explored>=3 && !R.hidOnce) ? "explore_hide" : "explore_hub"; }}
+]
+},
+room_records: {
+img:"📚",
+onEnter:function(){ if(!R.roomEntered){ R.roomEntered = true; M.recordsDeep++; } M.truthSelf = true; saveAll(); },
+text:function(){
+var t = "奥の部屋は、帳場の続きだった。\n\n棚には、記録の束と、名前の書かれたパンが並んでいた。一つひとつに、違う名前があった。\n\n一番新しい記録を開いた。今夜のことが、途中まで書かれていた。\n\n私が店に着いたこと。席に座ったこと。――字は、途中から、私の字だった。";
+addNote("records_self","奥の部屋の記録に、今夜のことが途中まで書かれていた。字は、私の字だった。");
+saveAll();
+return t;
+},
+choices:[ {t:"部屋を出る", to:function(){ return (R.explored>=3 && !R.hidOnce) ? "explore_hide" : "explore_hub"; }} ]
+},
+explore_hide: {
+img:"🌑",
+text: "奥から、足音がした。店主が戻ってくる。\n\n私は、カウンターの向こう側にいた。言い訳のできる場所では、なかった。",
+choices:[
+{t:"カウンターの下に隠れる", to:function(){ return isRain() ? "explore_clean" : "explore_caught"; }},
+{t:"棚の影に隠れる", to:function(){ return (M.loops % 2 === 0) ? "explore_clean" : "explore_caught"; }},
+{t:"奥の部屋の戸の陰に隠れる", to:"explore_clean", if:function(){ return !!R.roomEntered; }}
+]
+},
+explore_caught: {
+img:"🕯️",
+onEnter:function(){ R.hidOnce = true; R.caught = true; M.expCaught = true; saveAll(); },
+text:function(){
+var t = "足音が、止んだ。\n\n「……お客様？」\n\n店主の声は、優しいままだった。責める言い方は、しなかった。\n\n「閉店の支度を、していましたので」\n\n私は、席に戻った。店主は、私のいた方を、一度だけ見た。";
+addNote("slip_look","店主に、奥にいるところを見られた。店主は、責めなかった。");
+saveAll();
+return t;
+},
+choices:[ {t:"席で、夜が更けるのを待つ", to:"peek_return"} ]
+},
+explore_clean: {
+img:"🌑",
+onEnter:function(){ R.hidOnce = true; },
+text: "足音は、私のそばを通り過ぎて、窯の方へ行った。\n\n息を止めていたことに、音が遠ざかってから気づいた。\n\n店主が奥へ入るのを見てから、席に戻った。",
+choices:[ {t:"席で、夜が更けるのを待つ", to:"peek_return"} ]
+}
+,
+/* ---------- 持ち込み・写真 ---------- */
+pro_pocket: {
+img:"🎒",
+text:function(){
+var t = "ポケットと、鞄の中身を確かめた。\n\nスマホ。財布。小さな鍵。\n\nそして――";
+if(loopN()>=2) t += "\n前の夜のことがあって、今夜は、家を出る前に用意した物が入っていた。";
+return t;
+},
+choices:[
+{t:"おにぎりを持ってきた", to:"pro_dog", do:function(){ R.bring = "onigiri"; }},
+{t:"お茶のペットボトルを持ってきた", to:"pro_dog", do:function(){ R.bring = "tea"; }},
+{t:"食べ物は、持ってきていない", to:"pro_dog", do:function(){ R.bring = ""; }}
+]
+},
+photo_dog: {
+img:"📷",
+onEnter:function(){ takePhoto("dog"); },
+text: "スマホを向けると、犬は逃げなかった。\n\nシャッターの音が、森の中で少し大きく響いた。\n\n写真の中で、犬は店の方を向いていた。",
+choices:[ {t:"犬についていく", to:"pro_shop"} ]
+},
+photo_shop: {
+img:"📷",
+onEnter:function(){ takePhoto("shop"); },
+text: "店の中を、写真に撮った。\n\n窯の火。棚のパン。窓際の席。\n\n店主は、撮る間もカウンターの中で静かに立っていた。",
+choices:[ {t:"席に戻る", to:"hub1"} ]
+},
+photo_crow: {
+img:"📷",
+onEnter:function(){ takePhoto("crow"); },
+text: "屋根の端のカラスに、スマホを向けた。\n\nカラスは逃げなかった。枝には、三羽いた。\n\nシャッターを切ると、一羽だけがこちらを見た。",
+choices:[ {t:"森へ進む", to:"out_fork"} ]
+},
+photo_view: {
+img:"📱",
+text:function(){
+var t = "スマホの写真を、見返した。\n";
+var found = false;
+if(hasPhoto("crow")){
+  t += "\nカラスの写真。枝の上に、五羽いた。\n撮った時、枝には三羽だった。数え直しても、五羽だった。";
+  addNote("photo_crow","カラスの写真には、五羽写っていた。撮った時は、三羽だった。");
+  M.expPhoto = true; found = true;
+}
+if(hasPhoto("pair")){
+  t += "\n二人連れの写真。二人の座る席の間に、もう一人分の肩が、端に写っていた。";
+  addNote("photo_pair","二人連れの写真に、もう一人分の肩が写っていた。");
+  M.expPhoto = true; found = true;
+}
+if(hasPhoto("shop")){
+  t += "\n店内の写真。窓際の席に、コップが二つ写っていた。\nあの時、窓際にいたのは、一人だった。";
+  addNote("photo_shop","店内の写真で、窓際の席にコップが二つ写っていた。");
+  M.expPhoto = true; found = true;
+}
+if(hasPhoto("dog") && M.loops===2){
+  t += "\n犬の写真。名札には「しろ」と読めた。\n今夜の犬の名札は、「くろ」だった。";
+  addNote("photo_dog","犬の写真の名札は「しろ」。今夜の名札は「くろ」だった。");
+  M.expPhoto = true; found = true;
+}
+if(!found) t += "\n特に、おかしなところはなかった。";
+saveAll();
+return t;
+},
+choices:[ {t:"席に戻る", to:"hub1"} ]
+},
+
+/* ---------- 子どもの客 ---------- */
+ask_child: {
+img:"🧒",
+onEnter:function(){ R.metChild = true; },
+text:function(){
+if(!R.childIntro){
+  R.childIntro = true;
+  return "子どもの客は、椅子の上に膝を抱えて座っていた。\n\n帰り道のことを聞くと、首を傾げた。\n\n「帰るって、どこに？」\n\n「ぼくは、ここに来る前のこと、あんまり覚えてないや」";
+}
+return "子どもの客は、こちらを見上げた。";
+},
+choices:[
+{t:"空いている席のことを聞く", to:"ask_child_seat", if:function(){ return !R.childSeat; }},
+{t:"店主のことを聞く", to:"ask_child_shop", if:function(){ return !R.childShop; }},
+{t:"白い犬のことを聞く", to:"ask_child_dog", if:function(){ return !R.childDog; }},
+{t:"席に戻る", to:"hub1"}
+]
+},
+ask_child_seat: {
+img:"🧒",
+onEnter:function(){ R.childSeat = true; },
+text: "「あの席のこと？」\n\n子どもは、カウンターに一番近い席を指さした。誰も座っていない席だった。\n\n「あの席の人、今日はまだ来ないの？　いつも、最初に来てるのに」\n\n誰の席なのかは、分からなかった。",
+choices:[ {t:"話を続ける", to:"ask_child"} ]
+},
+ask_child_shop: {
+img:"🧒",
+onEnter:function(){ R.childShop = true; },
+text: "「店主さん？　やさしいよ」\n\n子どもは、足をぶらぶらさせた。\n\n「この前、あの人が言ってた。『また同じ夢を見た』って。起きたら朝ごはんの匂いがする夢だって」\n\n「……ぼくは、朝ごはんの匂い、忘れちゃったけど」",
+choices:[ {t:"話を続ける", to:"ask_child"} ]
+},
+ask_child_dog: {
+img:"🧒",
+onEnter:function(){ R.childDog = true; },
+text: "「犬？　あの犬はね、お店の犬じゃないよ」\n\n子どもは、窓の外を見た。\n\n「お客さんなんだって。ずっと前に来て、帰らなかったお客さん」\n\n「……誰に聞いたの、って？　あの犬に決まってるじゃん」",
+choices:[ {t:"話を続ける", to:"ask_child"} ]
+},
+
+/* ---------- 二人連れ ---------- */
+ask_pair: {
+img:"👥",
+onEnter:function(){ R.metPair = true; },
+text:function(){
+if(!R.pairIntro){
+  R.pairIntro = true;
+  return "二人連れは、向かい合って座り、小声で話していた。\n\n声をかけると、二人とも同じように笑った。\n\n「帰り道？　私たちは、もう探していないんです」\n\n「ここは、居心地がいいですから」";
+}
+return "二人連れは、小声で話していた。時々、二人同時にこちらを見た。";
+},
+choices:[
+{t:"帰り道のことを、もう一度聞く", to:"ask_pair_way", if:function(){ return !R.pairWay; }},
+{t:"二人の写真を撮らせてもらう", to:"photo_pair", if:function(){ return !hasPhoto("pair"); }},
+{t:"席に戻る", to:"hub1"}
+]
+},
+ask_pair_way: {
+img:"👥",
+onEnter:function(){ R.pairWay = true; },
+text: "「前に、一度だけ出てみたことがあります」\n\n一人が言った。\n\n「森を抜けた先に、街がありました。明るくて、朝の匂いがして」\n\n「でも、気づいたら、店の前だったんです」\n\nもう一人が、少し遅れて、同じ笑い方をした。",
+choices:[ {t:"話を続ける", to:"ask_pair"} ]
+},
+photo_pair: {
+img:"📷",
+onEnter:function(){ takePhoto("pair"); },
+text: "「写真？　いいですよ」\n\n二人は並んで、笑った。\n\nシャッターを切る時、ファインダーの端で、何かが動いた気がした。",
+choices:[ {t:"話を続ける", to:"ask_pair"} ]
+},
+
+/* ---------- 名前の違う客 ---------- */
+ask_name: {
+img:"🌫️",
+onEnter:function(){ R.metName = true; },
+text:function(){
+var nm = guestName();
+if(!R.nameIntro){
+  R.nameIntro = true;
+  return "隅の席の客は、声をかけると、ゆっくり顔を上げた。\n\n「……ああ、客か。私はね、" + nm + "と言うんだ」\n\n「名前くらい、覚えておくといい。夜ごとに、軽くなるから」";
+}
+return nm + "と名乗った客は、窓の外でも店の中でもない方を見ていた。";
+},
+choices:[
+{t:"昔の店のことを聞く", to:"ask_name_old", if:function(){ return !R.nameOld; }},
+{t:"森のことを聞く", to:"ask_name_forest", if:function(){ return !R.nameForest; }},
+{t:"自分の顔のことを聞く", to:"ask_name_self", if:function(){ return !R.nameSelf; }},
+{t:"席に戻る", to:"hub1"}
+]
+},
+ask_name_old: {
+img:"🌫️",
+onEnter:function(){ R.nameOld = true; M.truthShop = true; saveAll(); },
+text: "「昔の店主はね――」\n\n客は、言いかけて、首を傾げた。\n\n「あれ。前の店主って、誰のことだったかな。今の店主は、最初は客だったんだ。それは、覚えている」\n\n「客が、店主になる。そういう店なんだよ、ここは」",
+choices:[ {t:"話を続ける", to:"ask_name"} ]
+},
+ask_name_forest: {
+img:"🌫️",
+onEnter:function(){ R.nameForest = true; M.truthForest = true; saveAll(); },
+text: "「森はね、人を呼ぶんだ」\n\n客は、静かに言った。\n\n「呼ばれた人は、店に着く。帰れたつもりでも、また呼ばれる。……店は、客がいないと、消えてしまうからね」\n\n「誰が言っていたのかは、忘れた。たぶん、私も呼ばれた一人だ」",
+choices:[ {t:"話を続ける", to:"ask_name"} ]
+},
+ask_name_self: {
+img:"🌫️",
+onEnter:function(){ R.nameSelf = true; },
+text:function(){
+var t = "「……あんたの顔、見たことがある」\n\n客は、私の顔を長く見た。\n\n「私の、前の顔に似ているんだ。名前を置いてくる前の、私の顔に」\n\nそれ以上は、何も言わなかった。";
+addNote("name_mirror","隅の席の客が「私の前の顔に似ている」と言った。");
+return t;
+},
+choices:[ {t:"話を続ける", to:"ask_name"} ]
+},
+
+/* ---------- 店側に立つ元客 ---------- */
+ask_former: {
+img:"🧑‍🍳",
+onEnter:function(){ R.metFormer = true; },
+text:function(){
+if(!R.formerIntro){
+  R.formerIntro = true;
+  return "カウンターの内側の人は、店主と同じ側に立って、棚のパンを眺めていた。\n\n声をかけると、穏やかに振り向いた。\n\n「いらっしゃいませ。……ああ、違いましたね。つい」";
+}
+return "カウンターの内側の人は、パンを並べる真似をしていた。";
+},
+choices:[
+{t:"前は、客だったのか聞く", to:"ask_former_past", if:function(){ return !R.formerPast; }},
+{t:"席に戻る", to:"hub1"}
+]
+},
+ask_former_past: {
+img:"🧑‍🍳",
+onEnter:function(){ R.formerPast = true; M.truthShop = true; saveAll(); },
+text:function(){
+var t = "「前は、こちら側……いえ、あちら側の席に、座っていました」\n\nその人は、カウンターに手を置いた。\n\n「座っているうちに、立つ方が落ち着くようになって。店主が、最初は客だったのと、同じですよ」\n\n「誰も、止めませんでした。私も、止めませんでした」";
+addNote("former_counter","前は客だった人が、カウンターの内側に立っていた。誰も、それに触れなかった。");
+return t;
+},
+choices:[ {t:"席に戻る", to:"hub1"} ]
+},
+
+/* ---------- その夜初めての客 ---------- */
+ask_new: {
+img:"🚪",
+onEnter:function(){ R.metNew = true; },
+text: "ドアのベルが鳴って、客が一人、入ってきた。\n\n森の中で目が覚めて、帰り方が分からないのだと言った。私の、最初の夜とそっくりだった。\n\nその人は、店主の挨拶にほっとした顔をして、私の方を見た。",
+choices:[
+{t:"「店の外は危ない」と忠告する", to:"ask_new_end", do:function(){ M.newGuestFate = "warned"; saveAll(); }},
+{t:"何も言わない", to:"ask_new_end", do:function(){ M.newGuestFate = "silent"; saveAll(); }},
+{t:"「店にいれば、夜明けまで安全ですよ」と言う", to:"ask_new_end", do:function(){ M.newGuestFate = "lied"; saveAll(); }}
+]
+},
+ask_new_end: {
+img:"🚪",
+text:function(){
+if(M.newGuestFate==="warned") return "その人は、何度も頷いて、窓際の席に座った。\n\n「ありがとう。……出ない方が、いいんですね」\n\n私の言ったことが、正しいのかは分からなかった。";
+if(M.newGuestFate==="lied") return "「そうですか。よかった」\n\nその人は、安心したように笑って、席に座った。\n\n言った後で、自分の言葉が、誰かの言葉の繰り返しだったことに気づいた。";
+return "私は、何も言わなかった。\n\nその人は、店主の話を聞いて、カウンター近くの席に座った。";
+},
+choices:[ {t:"席に戻る", to:"hub1"} ]
+},
+ask_new2: {
+img:"🪑",
+onEnter:function(){ R.metNew = true; },
+text:function(){
+if(M.newGuestFate==="warned") return "あの夜の客の席は、空いていた。\n\nコップも、メモ帳もなかった。来ていないのか、帰れたのかは、分からなかった。";
+if(M.newGuestFate==="lied") return "あの夜の客は、筆談の客の隣に座っていた。\n\n声をかけようとすると、その人はメモ帳を開いて、じっとこちらを見た。\n\n何も書かれてはいなかった。";
+return "あの夜の客は、カウンター近くの席で、店主と笑い合っていた。\n\n私の最初の夜の顔とは、もう違っていた。";
+},
+choices:[ {t:"席に戻る", to:"hub1"} ]
+}
+
+};
+
+/* エンディング到達処理 */
+function reachEnding(id){
+M.endings[id] = true;
+R.endedId = id;
+/* 静かな客は、この夜のどこかで声を払う（次周から筆談） */
+if(M.metQuiet) M.quietVoiceless = true;
+M.bringUnlocked = true;
+saveAll();
+}
+function finishRun(){
+if(R.reread){ showTitle(); return;}
+M.loops += 1;
+if(finalReady()) M.finalArmed = true;
+saveAll();
+R = newRun(); saveAll();
+showTitle();
+}
+
+/* ============ 起動 ============ */
+showTitle();
 </script>
 </body>
 </html>
