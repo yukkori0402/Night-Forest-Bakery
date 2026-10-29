@@ -614,7 +614,7 @@ function openCollection(){
   ENDING_DEFS.forEach(function(e){
     var got = !!M.endings[e.id];
     if(got) any = true;
-    html += '<div class="coll-item"><div><div class="t">' + (got ? "「" + esc(e.title) + "」" : "？？？") + '</div><div class="s">' + (got ? "読み返せる" : esc(e.hint || "まだ辿り着いていない")) + '</div></div>';
+    html += '<div class="coll-item"><div><div class="t">' + (got ? "「" + esc(e.title) + "」" : "？？？") + '</div><div class="s">' + esc(e.hint || "まだ辿り着いていない") + '</div></div>';
     if(got) html += '<button class="tool" onclick="rereadEpi(\'' + e.epi + '\')">後日談を読み返す</button>';
     html += '</div>';
   });
