@@ -204,12 +204,13 @@ function newRun(){
     peeked: false,         // 冊子を覗いた
     noticedMaybe: false,   // 店主が気づいたかもしれない余韻
     scattered: false,      // 終盤、欠片を落としながら出た
+    markedReturn: false,   // 外出の帰りに、目印の欠片を落とした
     callItem: "",          // 呼びかけの「忘れ物」への対応 took/denied/shown
     _pendingEat: "", _eatReturn: "",
     bring: "", bringEaten: false, bringShared: false, smellDone: false,
     trustShop: 2, trustTalk: 2, trustQuiet: 2, liedShop: false,
     metChild: false, metPair: false, metName: false, metNew: false, metFormer: false,
-    phoneDone: false,
+    phoneDone: false, talkClock: 0, guestsGone: false,
     explored: 0, recordsRead: false, roomEntered: false, caught: false, recordsVisits: 0, kitchenVisits: 0, leftVisits: 0, umbrellaVisits: 0, diaryVisits: 0, roomVisits: 0, hideSpot: "", ownPriceWorry: false, ownPriceAsked: false, tookPhotos: [], photoAlienShown: false,
     kuroBought: false, paidName: false, kuroAte: false,
     gaveMorning: false,
@@ -224,6 +225,7 @@ var R = loadJSON(RUN_KEY, null);  if(!R || typeof R !== "object") R = newRun();
 (function(){
   var dm = newMeta(); for(var k in dm){ if(M[k]===undefined) M[k]=dm[k]; }
   var dr = newRun();  for(var k2 in dr){ if(R[k2]===undefined) R[k2]=dr[k2]; }
+  M.slips = Math.max(M.slips||0, M.notes.filter(function(n){ return n.id.indexOf("slip")>=0; }).length);
   /* 声の喪失は、実際に話題を聞いた会話があった場合だけ。会話の記録（手帳メモ）が無いのに筆談化していた旧セーブは戻す */
   if(M.quietVoiceless && !M.talkedQuiet){
     var hasQuietNote = false;
@@ -247,7 +249,7 @@ function edibleId(){ var ids=["marui","oto","kinou","wake","nioi","omosa"]; for(
 function addNote(id, text){
   for(var i=0;i<M.notes.length;i++){ if(M.notes[i].id===id) return; }
   M.notes.push({id:id, text:text});
-  if(id.indexOf("slip")===0) M.slips = M.notes.filter(function(n){ return n.id.indexOf("slip")===0; }).length;
+  if(id.indexOf("slip")>=0) M.slips = Math.max(M.slips||0, M.notes.filter(function(n){ return n.id.indexOf("slip")>=0; }).length);
 }
 function bumpHunger(n){ R.hunger = Math.max(0, Math.min(3, R.hunger + n)); }
 function hungerWord(){
@@ -259,11 +261,23 @@ function hungerWord(){
 function pname(){ return M.name ? M.name : "わたし"; }
 function loopN(){ return M.loops + 1; }
 function isRain(){ return M.loops % 3 === 2; }
+function bumpTalk(){
+  R.talkClock = (R.talkClock || 0) + 1;
+  if(R.talkClock >= 3) R.phase = Math.max(R.phase, 2);
+  if(R.talkClock >= 6){ R.phase = Math.max(R.phase, 3); R.guestsGone = true; }
+  saveAll();
+}
+function guestGone(kind){
+  if(!R.guestsGone) return false;
+  if(kind === "talk") return !!R.talkWay;
+  if(kind === "quiet") return !!R.quietWay;
+  return true;
+}
 function guestName(){ var ns = ["あきら","さくら","れん","ゆず"]; return ns[M.loops % 4]; }
 function prevGuestName(){ var ns = ["あきら","さくら","れん","ゆず"]; return ns[(M.loops + 3) % 4]; }
 function hasPhoto(id){ return M.photos.indexOf(id) >= 0; }
 function takePhoto(id){ if(!hasPhoto(id)) M.photos.push(id); if(R.tookPhotos && R.tookPhotos.indexOf(id) < 0) R.tookPhotos.push(id); }
-function finalReady(){ return M.truthForest && M.truthShop && M.truthSelf && M.slips >= 4 && M.expScatter && M.expNoScatter && (M.expCaught || M.expPhoto); }
+function finalReady(){ return M.truthForest && M.truthShop && M.truthSelf && M.slips >= 3 && M.expScatter && M.expNoScatter && (M.expCaught || M.expPhoto); }
 function smellPending(){ return R.bring==="onigiri" && !R.bringEaten && !R.bringShared && !R.smellDone && !hasBread("nioi"); }
 function destAfterOut(){ return smellPending() ? "smell_check" : "back_shop"; }
 
@@ -414,6 +428,18 @@ function render(){
   if(sc.timeout && !R.reread){
     var tkT = navToken; var destT = sc.timeout.to; var msecT = sc.timeout.sec * 1000; var curT = R.scene;
     setTimeout(function(){ if(tkT===navToken && R.scene===curT) go(destT); }, msecT);
+    if(sc.timeout.stages){
+      sc.timeout.stages.forEach(function(st){
+        setTimeout(function(){
+          if(tkT===navToken && R.scene===curT){
+            var p = document.createElement("p");
+            p.textContent = st.text;
+            var stHost = contentEl.querySelector(".scene-text");
+            if(stHost) stHost.appendChild(p); else contentEl.appendChild(p);
+          }
+        }, st.sec * 1000);
+      });
+    }
   }
   /* 既読スキップ：本文が前回と本当に同じ単一選択シーンだけを自動で送る（選択肢の前では必ず止まる） */
   if(M.skip && seenBefore && list.length === 1){
@@ -521,7 +547,18 @@ function openNotebook(){
   var html = "<h2>手帳</h2>";
   html += '<div style="font-size:13px;color:var(--muted);margin-bottom:6px">店で見聞きしたことが、そのまま書き留めてある。</div>';
   if(!M.notes.length) html += '<div class="empty">まだ何も書かれていない。</div>';
-  M.notes.forEach(function(n){ html += '<div class="entry">' + esc(n.text) + '</div>'; });
+  var nudgeNotes = M.notes.filter(function(n){ return n.id.indexOf("nudge_") === 0; });
+  var slipNotes = M.notes.filter(function(n){ return n.id.indexOf("nudge_") !== 0 && n.id.indexOf("slip") >= 0; });
+  var restNotes = M.notes.filter(function(n){ return n.id.indexOf("nudge_") !== 0 && n.id.indexOf("slip") < 0; });
+  function noteSection(title, arr){
+    if(!arr.length) return "";
+    var h = '<div style="margin:14px 0 4px;font-weight:bold">' + title + '</div>';
+    arr.forEach(function(n){ h += '<div class="entry">' + esc(n.text) + '</div>'; });
+    return h;
+  }
+  html += noteSection("―― 気づき", nudgeNotes);
+  html += noteSection("―― 店主の言い直し", slipNotes);
+  html += noteSection("―― メモ", restNotes);
   html += '<div style="margin-top:14px"><button class="tool" onclick="closeOverlay()">閉じる</button> ';
   html += '<button class="tool" onclick="renamePrompt()">名前を変更する</button></div>';
   sheetEl.innerHTML = html;
@@ -811,32 +848,35 @@ hub1: {
     if(R.paidPrice==="半分を誰かにあげる約束") t += "分け合うパンの重さが、膝の上で落ち着かなかった。\n";
     if(!R.metTalkRun) t += "カウンター近くの客と、目が合った。向こうから、笑いかけてきた。\n";
     if(loopN()>=2) t += "窓際とは反対の席で、二人連れが小声で話していた。子どもの客が、椅子の上で足を揺らしていた。\n";
-    if(loopN()>=3) t += "隅の席の客は、店の中でも窓の外でもない方を見ていた。\n";
-    if(loopN()>=4) t += "カウンターの内側に、店主のほかに、もう一人立っていた。\n";
+    if(loopN()>=2) t += "隅の席の客は、店の中でも窓の外でもない方を見ていた。\n";
+    if(loopN()>=3) t += "カウンターの内側に、店主のほかに、もう一人立っていた。\n";
     if(loopN()>=4 && M.newGuestFate==="lied") t += "筆談の客の隣の席で、あの夜の客が、メモ帳を膝に置いて座っていた。\n";
     if(loopN()>=4 && M.newGuestFate==="silent") t += "あの夜の客は、カウンター近くの席で、もう笑っていた。初めての夜の顔では、なかった。\n";
     if(loopN()>=4 && M.newGuestFate==="lied") addNote("newguest_lied","あの夜、嘘をついた客は、メモ帳を持つようになっていた。");
     if(loopN()>=4 && M.newGuestFate==="silent") addNote("newguest_silent","あの夜の客は、もう初めての顔をしていなかった。");
     if(loopN()>=4 && M.newGuestFate==="warned") addNote("newguest_gone","あの夜、忠告した客は、もう店にいなかった。");
+    if(R.guestsGone && R.talkWay) t += "カウンター近くの席が、空いていた。帰ったところは、見ていない。\n";
+    if(R.guestsGone && R.quietWay) t += "窓際の席も、空だった。\n";
+    if(R.guestsGone) t += "子どもの客と、二人連れの姿も、なかった。\n";
     t += "窓の外は暗く、森の気配だけがあった。この店に夜明けまでいていいのかどうかも、帰り道も、まだ何も分からなかった。";
     return t;
   },
 choices:[
-    {t:"カウンター近くの客の声に、答える", to:"ask_talk_intro", if:function(){ return !R.metTalkRun; }},
-    {t:"常連客と、話をする", to:"ask_talk", if:function(){ return R.metTalkRun && !(R.talkShop && R.talkPrice && R.talkWay); }},
+    {t:"カウンター近くの客の声に、答える", to:"ask_talk_intro", if:function(){ return !R.metTalkRun && !guestGone("talk"); }},
+    {t:"常連客と、話をする", to:"ask_talk", if:function(){ return R.metTalkRun && !(R.talkShop && R.talkPrice && R.talkWay) && !guestGone("talk"); }},
     {t:"カウンターへ行って、店主に聞く", to:"ask_shop", if:function(){ return !(R.shopPrice2 && R.shopGuests && R.shopStay); }},
-    {t:"窓際の客に、帰り道のことを聞く", to:"ask_quiet", if:function(){ return !(R.quietWay && R.quietPrice && R.quietVoice); }},
-    {t:"窓際の客に、パンの半分を渡す", to:"share_quiet", if:function(){ return hasBread("wake") && !R.sharedWake; }},
-    {t:"常連客に、パンの半分を渡す", to:"share_talk", if:function(){ return hasBread("wake") && !R.sharedWake && R.metTalkRun; }},
+    {t:"窓際の客に、帰り道のことを聞く", to:"ask_quiet", if:function(){ return !(R.quietWay && R.quietPrice && R.quietVoice) && !guestGone("quiet"); }},
+    {t:"窓際の客に、パンの半分を渡す", to:"share_quiet", if:function(){ return hasBread("wake") && !R.sharedWake && !guestGone("quiet"); }},
+    {t:"常連客に、パンの半分を渡す", to:"share_talk", if:function(){ return hasBread("wake") && !R.sharedWake && R.metTalkRun && !guestGone("talk"); }},
     {t:"店主に、パンの半分を渡す", to:"share_shop", if:function(){ return hasBread("wake") && !R.sharedWake; }},
     {t:"店の外を見に行く", to:"out_gate", if:function(){ return R.quietWay; }},
     {t:"それでも、外を見に行く", to:"out_gate", if:function(){ return !R.quietWay && R.talkWay && R.shopStay; }},
     {t:"席で、夜明けを待つ", to:"wait_stay", if:function(){ return !R.final && (R.talkWay || R.shopStay || R.quietWay); }},
     {t:"棚のパンを、見に行く", to:"shelf", if:function(){ return !R.boughtBread && (R.metTalkRun || R.quietWay || R.quietPrice || R.quietVoice || R.shopPrice2 || R.shopGuests || R.shopStay); }},
-    {t:"子どもの客に、声をかける", to:"ask_child", if:function(){ return loopN()>=2 && !R.metChild; }},
-    {t:"二人連れの客に、声をかける", to:"ask_pair", if:function(){ return loopN()>=2 && !R.metPair; }},
-    {t:"隅の席の客に、声をかける", to:"ask_name", if:function(){ return loopN()>=3 && !R.metName; }},
-    {t:"カウンターの内側の人に、声をかける", to:"ask_former", if:function(){ return loopN()>=4 && !R.metFormer; }},
+    {t:"子どもの客に、声をかける", to:"ask_child", if:function(){ return loopN()>=2 && !R.metChild && !guestGone("child"); }},
+    {t:"二人連れの客に、声をかける", to:"ask_pair", if:function(){ return loopN()>=2 && !R.metPair && !guestGone("pair"); }},
+    {t:"隅の席の客に、声をかける", to:"ask_name", if:function(){ return loopN()>=2 && !R.metName; }},
+    {t:"カウンターの内側の人に、声をかける", to:"ask_former", if:function(){ return loopN()>=3 && !R.metFormer; }},
     {t:"ドアのそばで戸惑っている客に、声をかける", to:"ask_new", if:function(){ return loopN()>=3 && !R.metNew && !M.newGuestFate; }},
     {t:"あの夜の客の様子を見る", to:"ask_new2", if:function(){ return loopN()>=4 && !!M.newGuestFate && !R.metNew; }},
     {t:"店内の写真を撮る", to:"photo_shop", if:function(){ return loopN()>=2 && !hasPhoto("shop"); }},
@@ -861,7 +901,7 @@ choices:[
 },
 ask_shop_price2: {
   img:"🔔",
-  onEnter:function(){ R.shopPrice2 = true; },
+  onEnter:function(){ R.shopPrice2 = true; bumpTalk(); },
   text:function(){
     if(M.loops>=1){
       addNote("shop_slip_price","店主「お代は、いつも、そうなんですよ」");
@@ -874,7 +914,7 @@ choices:[ {t:"話を続ける", to:"ask_shop"} ]
 },
 ask_shop_ownprice: {
   img:"🔔",
-  onEnter:function(){ R.ownPriceAsked = true; },
+  onEnter:function(){ R.ownPriceAsked = true; bumpTalk(); },
   text:function(){
     addNote("own_price_unknown","自分のお代に何が入っているか聞いたが、店主は答えなかった。");
     saveAll();
@@ -885,7 +925,7 @@ ask_shop_ownprice: {
 
 ask_shop_guests: {
   img:"🔔",
-  onEnter:function(){ R.shopGuests = true; },
+  onEnter:function(){ R.shopGuests = true; bumpTalk(); },
   text:function(){
     if(M.loops>=1){
       addNote("shop_slip_guests","店主が「あなたも、もう何度も」と言いかけて、やめた。");
@@ -898,7 +938,7 @@ choices:[ {t:"話を続ける", to:"ask_shop"} ]
 },
 ask_shop_stay: {
   img:"🔔",
-  onEnter:function(){ R.shopStay = true; },
+  onEnter:function(){ R.shopStay = true; bumpTalk(); },
   text:function(){
     if(M.loops>=1){
       addNote("shop_slip_stay","店主が「いつもの席」と言いかけて、言い直した。");
@@ -929,13 +969,13 @@ choices:[
 },
 ask_talk_shop: {
   img:"🙂",
-  onEnter:function(){ R.talkShop = true; },
+  onEnter:function(){ R.talkShop = true; bumpTalk(); },
   text: "「この店？　午前0時に開いて、夜明け前に閉まる。それだけだよ」\n\n常連客は、カウンターの方を顎でしゃくった。\n\n「店主さんは、ずっとあのまんま。ぼくが来始めた頃から、変わらないと思う」\n\nいつ来始めたのか聞くと、常連客は少し笑って、コップの中を見た。\n\n「……いつだっけ。まあ、長いよ」\n\nコップの中身は、減っていないように見えた。",
 choices:[ {t:"話を続ける", to:"ask_talk"} ]
 },
 ask_talk_price: {
   img:"🙂",
-  onEnter:function(){ R.talkPrice = true; },
+  onEnter:function(){ R.talkPrice = true; bumpTalk(); },
   text:function(){
     if(!R.quietPrice && R.shopPrice2){
       return "「私のお代、店主さんに聞いても、『もういただいています』の一点張りで」\n\n「はは、あの人、いつもああだよ」\n\n「お代は、お金じゃなくて、小さな用事とか、約束とか。その時々で、店主さんが決めるんだ」\n\n「ぼくなんか、だいたいいつも、店の窓を拭いてる」\n\n笑いながら言った。";
@@ -949,6 +989,7 @@ choices:[ {t:"話を続ける", to:"ask_talk"} ]
 },
 ask_talk_way: {
   img:"🙂",
+  onEnter:function(){ bumpTalk(); },
   text:function(){
     R.talkWay = true;
     var t;
@@ -1013,6 +1054,7 @@ choices:[
 },
 ask_quiet_price: {
   img:"🤫",
+  onEnter:function(){ bumpTalk(); },
   text:function(){
     R.quietPrice = true; M.talkedQuiet = true;
     if(M.quietVoiceless){
@@ -1072,6 +1114,7 @@ ask_quiet_price: {
 },
 ask_quiet_way: {
   img:"🤫",
+  onEnter:function(){ bumpTalk(); },
   text:function(){
     R.quietWay = true; M.talkedQuiet = true;
     if(M.quietVoiceless){
@@ -1129,6 +1172,7 @@ ask_quiet_way: {
 },
 ask_quiet_voice: {
   img:"🤫",
+  onEnter:function(){ bumpTalk(); },
   text:function(){
     R.quietVoice = true; M.talkedQuiet = true;
     if(M.quietVoiceless){
@@ -1228,8 +1272,15 @@ choices:[
 {t:"買っておいたパンを食べる", to:"eat_out", if:function(){ return hasEdible() && R.hunger>=2;}, do:function(){ R._pendingEat = edibleId(); R._eatReturn = "out_turn";}},
 {t:"黒いパンを食べる", to:"eat_out", if:function(){ return hasBread("kuro") && R.hunger>=2;}, do:function(){ R._pendingEat = "kuro"; R._eatReturn = "out_turn";}},
 {t:"持ってきたおにぎりを食べる", to:"eat_bring", if:function(){ return R.bring==="onigiri" && !R.bringEaten && R.hunger>=2;}, do:function(){ R._eatReturn = "out_turn";}},
+{t:"パンくずを落としながら、戻る", to:"scatter_return", if:function(){ return !R.markedReturn && hasScatterable() && !isRain(); }},
 {t:"店には戻らず、このまま森を抜ける", to:"final_walk", if:function(){ return R.final && !R.finalBroken;}}
 ]
+},
+scatter_return: {
+img:"🍞",
+onEnter:function(){ M.expScatter = true; takeScatterable(); R.markedReturn = true; saveAll(); },
+text: "店へ戻る道すがら、パンを小さくちぎって、ところどころに落とした。\n\n戻れなくなった時のための、目印だった。振り返ると、欠片は暗さの中に、点々と続いていた。\n\nこの目印は、店へ戻るためのものだ。家へ帰る道には、ならない。",
+choices:[ {t:"店の明かりを頼りに、戻る", to:"out_lost"} ]
 },
 eat_out: {
 img:"🍞",
@@ -1260,6 +1311,7 @@ var t = "店の明かりを頼りに、戻った。\n\n";
 t += "一度、明かりが木の向こうに消えて、違う方角に現れた。立ち止まって、目を疑った。\n";
 if(!R.deepWent) t += "同じ木の前を、二度通った。二度目は、傷が逆の側にあった。\n";
 t += "やっと明かりが大きくなった時、時計は、思っていたよりずっと進んでいた。\n\n";
+if(R.markedReturn) t += "落としてきた欠片が、ところどころに見えた。数は、落とした分と合っている気がした。\n";
 t += "店の近くまで来た時、足元の落ち葉の上に、古いパンくずが点々と落ちているのを見た。乾いて、白っぽい。私のものではなかった。誰が落としたのかは、分からなかった。";
 addNote("crumb_old","店の近くの落ち葉の上に、乾いた古いパンくずが点々と落ちていた。");
 return t;
@@ -1308,7 +1360,7 @@ t += "自分の行を探した。名前も聞かれていないのに、書か�
 t += "……指が、先に止まったのは、別の頁だった。\n";
 t += "名前の欄の字が、一つだけ――私の字に、とてもよく似ていた。\n";
 t += "似ているだけだと思いたかった。けれど、字の癖までが、私のものだった。";
-addNote("counter_ledger","帳場の記録に、私の字によく似た字で書かれた名前があった。");
+addNote("counter_ledger","帳場の記録に、私の字によく似た字で書かれた名前があった。"); M.truthSelf = true;
 return t;
 },
 choices:[ {t:"もう少し、店の中を見る", to:"explore_hub"}]
@@ -1363,7 +1415,7 @@ choices:[
 {t:"店を出る", to:function(){ return R.gaveMorning ? "morning_farewell" : "depart_plain"; }},
 {t:"欠片を落としながら、店を出る", to:"depart_crumb", if:function(){ return hasScatterable() && !isRain(); }},
 {t:"店主に、持ってきたものを渡す", to:"give_food_late", if:function(){ return (R.bring==="onigiri" || R.bring==="tea") && !R.bringEaten && !R.bringShared; }},
-{t:"奥の部屋へ行く", to:"memo_stay", if:function(){ return R.roomEntered && M.recordsDeep>=2; }},
+{t:"奥の部屋へ行く", to:"memo_stay", if:function(){ return R.roomEntered && (M.truthSelf || (M.recordsDeep||0)>=2); }},
 {t:"「この店を、私に売ってください」と言う", to:"buyback_talk", if:function(){ return M.truthSelf && M.slips>=3; }, do:function(){ R.buybackFrom = "late"; }}
 ]
 },
@@ -1473,6 +1525,7 @@ choices:[ {t:"明かりへ向かう", to:"crumb_arrive"}]
 },
 crumb_arrive: {
 img:"🏮",
+onEnter:function(){ M.truthForest = true; saveAll(); },
 text: "明かりが、近づいた。湯気の匂い。――パン屋だった。\n\n足裏の当たりが、強くなっていた。明かりの下で靴を脱ぐと、欠片が一つ、ころりと落ちた。\n指でつまんで、店先の落ち葉の上に捨てた。\n\n窓の向こうが、楽しそうだった。",
 choices:[ {t:"窓を、覗く", to:"end_kz"}]
 },
@@ -1639,7 +1692,7 @@ choices:[ {t:"歩き続ける", to:"call_final"}]
 },
 call_final: {
 img:"🌲",
-timeout:{sec:12, to:"true_dawn"},
+timeout:{sec:7, to:"true_dawn", stages:[{sec:2.5, text:"足音は、やっぱりしなかった。なのに、気配だけが、近づいていた。"},{sec:5, text:"後ろで、店の明かりが、ふっと遠くなった。"}]},
 text: "だいぶ歩いたところで、後ろから声がした。\n\n「お忘れ物ですよー」\n\n店主の声だった。足音は、しなかった。\n\n声は、もう一度した。今度は、後ろからだけでは、なかった気がした。",
 choices:[
 {t:"「何を、忘れましたか」と聞き返す", to:"final_fail"},
@@ -2107,10 +2160,14 @@ choices:[ {t:"部屋を出る", to:function(){ return (R.explored>=3 && !R.hidOn
 },
 explore_hide: {
 img:"🌑",
-text: "奥から、足音がした。店主が戻ってくる。\n\n私は、カウンターの向こう側にいた。言い訳のできる場所では、なかった。",
+text:function(){
+var t = "奥から、足音がした。店主が戻ってくる。\n\n私は、カウンターの向こう側にいた。言い訳のできる場所では、なかった。\n\n店主は、窯を見に行っていた。戻ってくる時は、カウンターの前を通るはずだった。";
+if(isRain()) t += "\n\n雨音が、店の音を遠くしていた。";
+return t;
+},
 choices:[
 {t:"カウンターの下に隠れる", to:function(){ return isRain() ? "explore_clean" : "explore_caught"; }, do:function(){ R.hideSpot = "counter"; }},
-{t:"棚の影に隠れる", to:function(){ return (M.loops % 2 === 0) ? "explore_clean" : "explore_caught"; }, do:function(){ R.hideSpot = "shelf"; }},
+{t:"棚の影に隠れる", to:"explore_clean", do:function(){ R.hideSpot = "shelf"; }},
 {t:"奥の部屋の戸の陰に隠れる", to:"explore_clean", if:function(){ return !!R.roomEntered; }, do:function(){ R.hideSpot = "door"; }}
 ]
 },
@@ -2146,6 +2203,9 @@ if(R.hideSpot==="counter"){
 } else {
   t = "足音は、私のそばを通り過ぎて、窯の方へ行った。\n\n息を止めていたことに、音が遠ざかってから気づいた。\n\n店主が奥へ入るのを見てから、席に戻った。";
 }
+t += "\n\n遠ざかる足音の向こうで、店主が小さく言った。\n\n「……また、来た」\n\n私のことかどうかは、分からなかった。";
+addNote("slip_hide","隠れている間、店主が小さくつぶやいた。『……また、来た』");
+saveAll();
 return t;
 },
 choices:[ {t:"席で、夜が更けるのを待つ", to:"peek_return"} ]
@@ -2275,19 +2335,19 @@ choices:[
 },
 ask_child_seat: {
 img:"🧒",
-onEnter:function(){ R.childSeat = true; },
+onEnter:function(){ R.childSeat = true; bumpTalk(); },
 text: "「あの席のこと？」\n\n子どもは、カウンターに一番近い席を指さした。誰も座っていない席だった。\n\n「あの席の人、今日はまだ来ないの？　いつも、最初に来てるのに」\n\n誰の席なのかは、分からなかった。",
 choices:[ {t:"話を続ける", to:"ask_child"} ]
 },
 ask_child_shop: {
 img:"🧒",
-onEnter:function(){ R.childShop = true; },
+onEnter:function(){ R.childShop = true; bumpTalk(); },
 text: "「店主さん？　やさしいよ」\n\n子どもは、足をぶらぶらさせた。\n\n「この前、あの人が言ってた。『また同じ夢を見た』って。起きたら朝ごはんの匂いがする夢だって」\n\n「……ぼくは、朝ごはんの匂い、忘れちゃったけど」",
 choices:[ {t:"話を続ける", to:"ask_child"} ]
 },
 ask_child_dog: {
 img:"🧒",
-onEnter:function(){ R.childDog = true; },
+onEnter:function(){ R.childDog = true; bumpTalk(); },
 text: "「犬？　あの犬はね、お店の犬じゃないよ」\n\n子どもは、窓の外を見た。\n\n「お客さんなんだって。ずっと前に来て、帰らなかったお客さん」\n\n「……誰に聞いたの、って？　あの犬に決まってるじゃん」",
 choices:[ {t:"話を続ける", to:"ask_child"} ]
 },
@@ -2312,7 +2372,7 @@ choices:[
 },
 ask_pair_way: {
 img:"👥",
-onEnter:function(){ R.pairWay = true; },
+onEnter:function(){ R.pairWay = true; bumpTalk(); },
 text: "「前に、一度だけ出てみたことがあります」\n\n一人が言った。\n\n「森を抜けた先に、街がありました。明るくて、朝の匂いがして」\n\n「でも、気づいたら、店の前だったんです」\n\nもう一人が、少し遅れて、同じ笑い方をした。",
 choices:[ {t:"話を続ける", to:"ask_pair"} ]
 },
@@ -2345,19 +2405,19 @@ choices:[
 },
 ask_name_old: {
 img:"🌫️",
-onEnter:function(){ R.nameOld = true; M.truthShop = true; saveAll(); },
+onEnter:function(){ R.nameOld = true; M.truthShop = true; bumpTalk(); saveAll(); },
 text: "「昔の店主はね――」\n\n客は、言いかけて、首を傾げた。\n\n「あれ。前の店主って、誰のことだったかな」\n\nしばらく、空の席の方を見ていた。\n\n「……今の店主なら、覚えている。初めて会った時、あの人は客の席に座っていた。私の、隣の席に」\n\n「何を買ったのかは、思い出せないけど」",
 choices:[ {t:"話を続ける", to:"ask_name"} ]
 },
 ask_name_forest: {
 img:"🌫️",
-onEnter:function(){ R.nameForest = true; M.truthForest = true; saveAll(); },
+onEnter:function(){ R.nameForest = true; M.truthForest = true; bumpTalk(); saveAll(); },
 text: "「森はね、人を呼ぶんだ」\n\n客は、静かに言った。\n\n「呼ばれた人は、店に着く。帰れたつもりでも、また呼ばれる。……私が、そうだった」\n\n「誰が言っていたのかは、忘れた。たぶん、私も呼ばれた一人だ」",
 choices:[ {t:"話を続ける", to:"ask_name"} ]
 },
 ask_name_self: {
 img:"🌫️",
-onEnter:function(){ R.nameSelf = true; },
+onEnter:function(){ R.nameSelf = true; M.truthSelf = true; bumpTalk(); saveAll(); },
 text:function(){
 var t = "「……あんたの顔、見たことがある」\n\n客は、私の顔を長く見た。\n\n「私の、前の顔に似ているんだ。名前を置いてくる前の、私の顔に」\n\nそれ以上は、何も言わなかった。";
 addNote("name_mirror","隅の席の客が「私の前の顔に似ている」と言った。");
@@ -2384,7 +2444,7 @@ choices:[
 },
 ask_former_past: {
 img:"🧑‍🍳",
-onEnter:function(){ R.formerPast = true; M.truthShop = true; saveAll(); },
+onEnter:function(){ R.formerPast = true; M.truthShop = true; bumpTalk(); saveAll(); },
 text:function(){
 var t = "「前は、こちら側……いえ、あちら側の席に、座っていました」\n\nその人は、カウンターに手を置いた。\n\n「座っているうちに、立つ方が落ち着くようになって。店主が、最初は客だったのと、同じですよ」\n\n「誰も、止めませんでした。私も、止めませんでした」";
 addNote("former_counter","前は客だった人が、カウンターの内側に立っていた。誰も、それに触れなかった。");
@@ -2396,7 +2456,7 @@ choices:[ {t:"席に戻る", to:"hub1"} ]
 /* ---------- その夜初めての客 ---------- */
 ask_new: {
 img:"🚪",
-onEnter:function(){ R.metNew = true; },
+onEnter:function(){ R.metNew = true; bumpTalk(); },
 text: "ドアのベルが鳴って、客が一人、入ってきた。\n\n森の中で目が覚めて、帰り方が分からないのだと言った。私の、最初の夜とそっくりだった。\n\nその人は、店主の挨拶にほっとした顔をして、私の方を見た。",
 choices:[
 {t:"「店の外は危ない」と忠告する", to:"ask_new_end", do:function(){ M.newGuestFate = "warned"; saveAll(); }},
@@ -2435,7 +2495,7 @@ function pickNudge(){
   if(!M.expScatter) cand.push(["nudge_scatter", "パンくずは、まだ撒いたことがない。"]);
   else if(!M.expNoScatter) cand.push(["nudge_noscatter", "撒かずに帰る夜は、まだない。"]);
   if(!M.expPhoto && !M.expCaught) cand.push(["nudge_photo", "写真の中のことは、まだ確かめていない。"]);
-  if(M.slips < 4) cand.push(["nudge_slips", "店主の言い直しには、まだ続きがある気がする。"]);
+  if(M.slips < 3) cand.push(["nudge_slips", "店主の言い直しには、まだ続きがある気がする。"]);
   for(var i=0;i<cand.length;i++){ if(!M.nudgesShown[cand[i][0]]) return cand[i]; }
   return null;
 }
@@ -2453,7 +2513,7 @@ M.lastEndingId = id;
 if(id !== "trueend" && !M.pendingNudge){
   var pick = null;
   if(finalReady() && !M.nudgesShown["nudge_final"]) pick = ["nudge_final", "手帳のメモが、みんな同じ方を向いてきた。次の夜は、今までと違う夜になる。"];
-  else if(consecutiveEnd || M.endingCounts[id] >= 3) pick = pickNudge();
+  else if(M.loops >= 1 || consecutiveEnd || M.endingCounts[id] >= 3) pick = pickNudge();
   if(pick){
     M.nudgesShown[pick[0]] = true;
     M.pendingNudge = pick[1];
