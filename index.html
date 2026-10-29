@@ -173,7 +173,7 @@ function newMeta(){
     reviewedPhotos: [],     // 見返し済みの写真 id
     truthForest: false, truthShop: false, truthSelf: false,
     expScatter: false, expNoScatter: false,
-    expCaught: false,
+    expCaught: false, forestKnown: false,
     expPhoto: false,
     recordsDeep: 0,
     newGuestFate: "",
@@ -204,7 +204,7 @@ function newRun(){
     peeked: false,         // 冊子を覗いた
     noticedMaybe: false,   // 店主が気づいたかもしれない余韻
     scattered: false,      // 終盤、欠片を落としながら出た
-    markedReturn: false,   // 外出の帰りに、目印の欠片を落とした
+    markedTrail: false,   // 外出で、戻るための目印の欠片を落としながら進んだ
     callItem: "",          // 呼びかけの「忘れ物」への対応 took/denied/shown
     _pendingEat: "", _eatReturn: "",
     bring: "", bringEaten: false, bringShared: false, smellDone: false,
@@ -1231,6 +1231,7 @@ choices:[
 {t:"左の道を進む", to:"out_deep", do:function(){ R.forkChoice = "left";}},
 {t:"真ん中の道を進む", to:"out_deep", do:function(){ R.forkChoice = "center";}},
 {t:"右の道を進む", to:"out_deep", do:function(){ R.forkChoice = "right";}},
+{t:"パンくずを落としながら、奥へ進む", to:"scatter_advance", if:function(){ return !!M.forestKnown && hasScatterable() && !isRain(); }},
 {t:"買っておいたパンを食べる", to:"eat_out", if:function(){ return hasEdible() && R.hunger>=2;}, do:function(){ R._pendingEat = edibleId(); R._eatReturn = "out_fork";}},
 {t:"黒いパンを食べる", to:"eat_out", if:function(){ return hasBread("kuro") && R.hunger>=2;}, do:function(){ R._pendingEat = "kuro"; R._eatReturn = "out_fork";}},
 {t:"持ってきたおにぎりを食べる", to:"eat_bring", if:function(){ return R.bring==="onigiri" && !R.bringEaten && R.hunger>=2;}, do:function(){ R._eatReturn = "out_fork";}},
@@ -1241,6 +1242,12 @@ out_look: {
 img:"👀",
 text: "振り返ると、店の明かりが見えた。\n\n思っていたより、小さかった。歩いてきた距離の割に。\n\n……方角も、少しだけ、思っていたのと違った。明かりは、私が来たと思っていた方とは、違う木の間から覗いていた。",
 choices:[ {t:"三叉路に戻る", to:"out_fork"}]
+},
+scatter_advance: {
+img:"🍞",
+onEnter:function(){ M.expScatter = true; takeScatterable(); R.markedTrail = true; saveAll(); },
+text: "分かれ道で、パンを小さくちぎった。歩きながら、ところどころに落としていくことにした。\n\n進むための目印ではない。戻る時のための目印だ。振り返ると、欠片は点々と、店の明かりの方へ続いていた。\n\nそれだけを頼りに、奥へ進んだ。",
+choices:[ {t:"奥へ進む", to:"out_deep"} ]
 },
 out_deep: {
 img:"🌲",
@@ -1257,7 +1264,7 @@ choices:[
 },
 out_deeper: {
 img:"🌲",
-onEnter:function(){ bumpHunger(1); R.deepWent = true;},
+onEnter:function(){ bumpHunger(1); R.deepWent = true; M.forestKnown = true; saveAll(); },
 text: "流れの音は、近づいても遠いままだった。\n\nしばらく歩いて、足が止まった。\n\n目の前に、大きな木があった。幹に、古い傷。半分だけ皮の覆いかけた、見覚えのある傷だった。\n\n――さっき、通った木だった。\n\n後ろを向いた。来た方の先に、流れの音がしていた。さっきまで、後ろにはなかったはずの音だった。",
 choices:[ {t:"来た道を戻る", to:"out_turn"}]
 },
@@ -1272,15 +1279,8 @@ choices:[
 {t:"買っておいたパンを食べる", to:"eat_out", if:function(){ return hasEdible() && R.hunger>=2;}, do:function(){ R._pendingEat = edibleId(); R._eatReturn = "out_turn";}},
 {t:"黒いパンを食べる", to:"eat_out", if:function(){ return hasBread("kuro") && R.hunger>=2;}, do:function(){ R._pendingEat = "kuro"; R._eatReturn = "out_turn";}},
 {t:"持ってきたおにぎりを食べる", to:"eat_bring", if:function(){ return R.bring==="onigiri" && !R.bringEaten && R.hunger>=2;}, do:function(){ R._eatReturn = "out_turn";}},
-{t:"パンくずを落としながら、戻る", to:"scatter_return", if:function(){ return !R.markedReturn && hasScatterable() && !isRain(); }},
 {t:"店には戻らず、このまま森を抜ける", to:"final_walk", if:function(){ return R.final && !R.finalBroken;}}
 ]
-},
-scatter_return: {
-img:"🍞",
-onEnter:function(){ M.expScatter = true; takeScatterable(); R.markedReturn = true; saveAll(); },
-text: "店へ戻る道すがら、パンを小さくちぎって、ところどころに落とした。\n\n戻れなくなった時のための、目印だった。振り返ると、欠片は暗さの中に、点々と続いていた。\n\nこの目印は、店へ戻るためのものだ。家へ帰る道には、ならない。",
-choices:[ {t:"店の明かりを頼りに、戻る", to:"out_lost"} ]
 },
 eat_out: {
 img:"🍞",
@@ -1308,10 +1308,14 @@ img:"🌫️",
 onEnter:function(){ bumpHunger(1);},
 text:function(){
 var t = "店の明かりを頼りに、戻った。\n\n";
+if(R.markedTrail){
+t += "落としてきた欠片を、辿った。欠片は、暗さの中でも白く見えた。数は、落とした分と合っている気がした。\n";
+t += "明かりが、木の向こうに消えることはなかった。まっすぐ、大きくなっていった。\n\n";
+} else {
 t += "一度、明かりが木の向こうに消えて、違う方角に現れた。立ち止まって、目を疑った。\n";
 if(!R.deepWent) t += "同じ木の前を、二度通った。二度目は、傷が逆の側にあった。\n";
 t += "やっと明かりが大きくなった時、時計は、思っていたよりずっと進んでいた。\n\n";
-if(R.markedReturn) t += "落としてきた欠片が、ところどころに見えた。数は、落とした分と合っている気がした。\n";
+}
 t += "店の近くまで来た時、足元の落ち葉の上に、古いパンくずが点々と落ちているのを見た。乾いて、白っぽい。私のものではなかった。誰が落としたのかは、分からなかった。";
 addNote("crumb_old","店の近くの落ち葉の上に、乾いた古いパンくずが点々と落ちていた。");
 return t;
