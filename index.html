@@ -624,7 +624,7 @@ function shareEnding(){
   var count = Object.keys(M.endings || {}).length;
   var text = "『夜の森のパン屋』で結末" + count + "/11『" + (def ? def.title : "") + "』に着きました";
   var url = "https://yukkori0402.github.io/Night-Forest-Bakery/";
-  if(typeof window !== "undefined" && window.open) window.open("https://twitter.com/intent/tweet?text=" + encodeURIComponent(text) + "&url=" + encodeURIComponent(url), "_blank");
+  if(typeof window !== "undefined" && window.open) window.open("https://twitter.com/intent/tweet?text=" + encodeURIComponent(text) + "&url=" + encodeURIComponent(url) + "&hashtags=" + encodeURIComponent("夜の森のパン屋"), "_blank");
 }
 function openCollection(){
   var html = "<h2>これまでの結末</h2>";
