@@ -103,6 +103,7 @@
   .coll-item{display:flex;justify-content:space-between;align-items:center;gap:10px;border-top:1px dashed var(--line);padding:10px 2px;}
   .coll-item .t{font-size:16px;}
   .coll-item .s{font-size:12px;color:var(--muted);}
+  .coll-btns{display:contents;}
   .fade{animation:fade .55s ease;}
   @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
   .choices{animation:fade .6s .3s ease both;}
@@ -119,7 +120,7 @@
   body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:5;
     background:radial-gradient(120% 90% at 50% 40%, transparent 55%, rgba(58,38,14,.20) 100%);}
   body.late::after{background:radial-gradient(120% 90% at 50% 40%, transparent 48%, rgba(20,16,34,.40) 100%);}
-  @media (max-width:480px){ main.card{padding:22px 16px;} .scene-text{min-height:140px;} }
+  @media (max-width:480px){ main.card{padding:22px 16px;} .scene-text{min-height:140px;} .coll-item{flex-direction:column;align-items:stretch;} .coll-btns{display:flex;gap:8px;} .coll-btns button.tool{flex:1;white-space:nowrap;} }
 </style>
 </head>
 <body>
@@ -680,8 +681,7 @@ function openCollection(){
     var got = !!M.endings[e.id];
     if(got) any = true;
     html += '<div class="coll-item"><div><div class="t">' + (got ? "「" + esc(e.title) + "」" : "？？？") + '</div><div class="s">' + esc(e.hint || "まだ辿り着いていない") + '</div></div>';
-    if(got) html += '<button class="tool" onclick="rereadEpi(\'' + e.epi + '\')">後日談を読み返す</button>';
-    if(got) html += '<button class="tool" onclick="showExplain(\'' + e.id + '\')">この結末の意味</button>';
+    if(got) html += '<div class="coll-btns"><button class="tool" onclick="rereadEpi(\'' + e.epi + '\')">後日談を読み返す</button><button class="tool" onclick="showExplain(\'' + e.id + '\')">この結末の意味</button></div>';
     html += '</div>';
   });
   if(!any) html += '<div class="empty">まだ、どの結末にも辿り着いていない。</div>';
