@@ -183,6 +183,7 @@ function newMeta(){
     expCaught: false, forestKnown: false,
     expPhoto: false,
     recordsDeep: 0,
+    doorHint: false,       // 扉の手がかりを一度見つけた（周回をまたいで残る）
     newGuestFate: "",
     bringUnlocked: false,
     finalArmed: false,
@@ -233,6 +234,7 @@ var R = loadJSON(RUN_KEY, null);  if(!R || typeof R !== "object") R = newRun();
   var dm = newMeta(); for(var k in dm){ if(M[k]===undefined) M[k]=dm[k]; }
   var dr = newRun();  for(var k2 in dr){ if(R[k2]===undefined) R[k2]=dr[k2]; }
   M.slips = Math.max(M.slips||0, M.notes.filter(function(n){ return n.id.indexOf("slip")>=0; }).length);
+  if((M.recordsDeep||0) >= 1) M.doorHint = true; /* 部屋に入ったことがある旧セーブは、扉の手がかりを見つけたものとして扱う */
   /* 声の喪失は、実際に話題を聞いた会話があった場合だけ。会話の記録（手帳メモ）が無いのに筆談化していた旧セーブは戻す */
   if(M.quietVoiceless && !M.talkedQuiet){
     var hasQuietNote = false;
@@ -2170,7 +2172,7 @@ if(R.recordsVisits>=3){
   t = "帳場の記録は、頁ごとに、夜の日付が並んでいた。紙は薄く、繰るたびに乾いた音がした。\n\nどの頁にも、客の名前と、買ったパンと、お代。\n\n頁を繰ると、古い夜ほど、名前の字が読みにくかった。消えかけているのではなかった。最初から、ああいう字だった。";
 } else {
   t = "記録の、奥の方の頁を開いた。\n\nそこには「奥の部屋に、続きを置く」とだけ書かれた頁があった。\n\n字は、私の字だった。";
-  R.doorHint = true;
+  R.doorHint = true; M.doorHint = true;
 }
 saveAll();
 return t;
@@ -2241,13 +2243,13 @@ explore_door: {
 img:"🚪",
 onEnter:function(){ R.explored++; },
 text:function(){
-if(R.doorHint){
+if(R.doorHint || M.doorHint){
   return "一番奥に、開けてはいけないと言われていない扉があった。\n\n……言われていない。誰にも、止められていない。\n\n記録にあった「奥の部屋」は、この向こうらしかった。\n\n鍵は、掛かっていなかった。手を伸ばせば、届く距離だった。";
 }
 return "一番奥に、小さな扉があった。近づくと、足音が少しだけ低く響いた。\n\n鍵は、掛かっていなかった。\n\n開ける理由が、まだなかった。気になるだけでは、手が伸びなかった。";
 },
 choices:[
-{t:"扉を開ける", to:"room_records", if:function(){ return !!R.doorHint; }},
+{t:"扉を開ける", to:"room_records", if:function(){ return !!(R.doorHint || M.doorHint); }},
 {t:"調べるのを続ける", to:function(){ return (R.explored>=3 && !R.hidOnce) ? "explore_hide" : "explore_hub"; }}
 ]
 },
