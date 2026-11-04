@@ -11,6 +11,7 @@
 <meta property="og:url" content="https://yukkori0402.github.io/Night-Forest-Bakery/">
 <meta property="og:image" content="https://yukkori0402.github.io/Night-Forest-Bakery/ogp.png">
 <meta name="twitter:card" content="summary_large_image">
+<script>(function(){try{var m=location.search.match(/[?&]no_ga=([01])/);if(m){m[1]==='1'?localStorage.setItem('nfb_no_ga','1'):localStorage.removeItem('nfb_no_ga');}if(localStorage.getItem('nfb_no_ga'))return;}catch(e){}var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id=G-L0L02TYHQ4';document.head.appendChild(s);window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments);};gtag('js',new Date());gtag('config','G-L0L02TYHQ4');})();</script>
 <style>
   :root{
     --bg:#f3e7cf; --bg2:#ecd9b8; --card:#fffaf0; --card2:#fff5e2;
@@ -155,6 +156,7 @@
 
 <script>
 "use strict";
+function track(name, params){ try{ if(window.gtag) gtag('event', name, params || {}); }catch(e){} }
 /* ================================================================
    夜の森のパン屋 v2（核スライス・書き直し版）
    保存キー: nfb_v2_meta（周回をまたぐ）/ nfb_v2_run（周回内）
@@ -498,6 +500,7 @@ function showTitle(){
   html += '</div>';
   html += '<div style="font-size:13px;color:var(--muted);margin:2px 0 10px">※ 静かなホラー要素のある物語です</div>';
   html += '<div style="font-size:12px;color:var(--muted);margin:0 0 10px">進み具合はこの端末のブラウザに保存されます。履歴を消すと消えることがあります</div>';
+  html += '<div style="font-size:12px;color:var(--muted);margin:0 0 10px">遊ばれた回数を知るためにGoogleアナリティクス(クッキーを使用)を使っています。集めるのは匿名の閲覧データだけです。</div>';
   if(!hasName){
     html += '<label style="font-size:14px;color:var(--ink2)">あなたの名前</label>';
     html += '<input class="namein" id="nameInput" type="text" maxlength="12" placeholder="名前を入力してください" autocomplete="off">';
@@ -525,6 +528,7 @@ function showTitle(){
         M.name = v; saveAll();
       }
       R = newRun(); saveAll();
+      track('game_start', {loops: M.loops});
       chooseReason();
     });
   }
@@ -537,6 +541,7 @@ function savedRunExists(){
 }
 function startFreshRun(){
   R = newRun(); saveAll();
+  track('game_start', {loops: M.loops});
   if(!M.reason){ chooseReason(); } else { go("pro_lost"); }
 }
 function chooseReason(){
@@ -2685,6 +2690,7 @@ function pickNudge(){
   return null;
 }
 function reachEnding(id){
+if(!R.reread){ track('game_ending', {ending_id: id, loops: M.loops}); }
 M.endings[id] = true;
 R.endedId = id;
 /* 静かな客は、この夜のどこかで声を払う（次周から筆談） */
